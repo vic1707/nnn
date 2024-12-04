@@ -1,0 +1,25 @@
+[build]
+rustflags = [
+    ## Warning ##
+    "-Dclippy::pedantic",
+    "-Dclippy::restriction",
+    "-Dclippy::nursery",
+    "-Dclippy::cargo",
+    ## Conflicts ##
+    "-Aclippy::blanket_clippy_restriction_lints", # clippy::restriction                 - can't enable clippy::restriction if this is enabled
+    "-Aclippy::implicit_return",                  # clippy::needless-return             - remove return keyword when not needed
+    "-Aclippy::pub-with-shorthand",               # clippy::pub-without-shorthand       - pub(<scope>) instead of pub(in <scope>)
+    "-Aclippy::self_named_module_files",          # clippy::mod_module_files
+    "-Aclippy::mod_module_files",                 # clippy::self_named_module_files
+    "-Aclippy::separated_literal_suffix",         # clippy::unseparated_literal_suffix  - 1.0_f64 vs 1.0f64
+    ## Allowed ##
+    "-Aclippy::missing_trait_methods",   # convenience
+    "-Aclippy::question_mark_used",      # convenience
+    "-Aclippy::redundant_pub_crate",     # prefer explicitness
+    "-Aclippy::renamed_function_params", # I do what I want damn
+    "-Aclippy::single_call_fn",          # convenience
+    "-Aclippy::ref_patterns",
+    ## Maybe remove one day ##
+    "-Aclippy::cargo_common_metadata",
+    "-Aclippy::missing_docs_in_private_items",
+]
