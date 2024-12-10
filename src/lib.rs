@@ -19,5 +19,13 @@ fn expand(
     nnn_args: proc_macro::TokenStream,
     type_definition: proc_macro::TokenStream,
 ) -> syn::Result<proc_macro2::TokenStream> {
+    let input: syn::DeriveInput = syn::parse(type_definition)?;
+    if let Some(attr) = input.attrs.first() {
+        return Err(syn::Error::new_spanned(
+            attr,
+            "Attributes are not supported; pass additional parameters via `nnn` instead.",
+        ));
+    }
+
     todo!();
 }
