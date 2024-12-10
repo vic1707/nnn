@@ -1,11 +1,20 @@
-#![expect(clippy::needless_pass_by_value, unused_variables, reason = "WIP")]
+#![expect(clippy::todo, dead_code, reason = "WIP")]
+#![expect(
+    clippy::print_stderr,
+    clippy::use_debug,
+    reason = "Usefull for debuging"
+)]
 /* Modules */
+mod argument;
 mod utils;
 /* Crate imports */
+use argument::{Argument, Arguments};
 use utils::syn_ext::SynDataExt as _;
 /* Dependencies imports */
 use quote::quote;
-use syn::{token::Pub, Fields, Visibility};
+use syn::{
+    parse::Parser as _, punctuated::Punctuated, token::Pub, Fields, Visibility,
+};
 
 #[proc_macro_attribute]
 pub fn nnn(
@@ -75,6 +84,12 @@ fn expand(
             ));
         },
     }
+
+    let args = Arguments::from(
+        Punctuated::<Argument, syn::Token![,]>::parse_terminated
+            .parse(nnn_args)?,
+    );
+    eprintln!("ATTRIBUTES PARSED: {args:#?}");
 
     Ok(quote! {
         #[doc(hidden)]
