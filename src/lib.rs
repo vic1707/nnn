@@ -6,6 +6,7 @@
 )]
 /* Modules */
 mod argument;
+mod gen;
 mod utils;
 /* Crate imports */
 use argument::{Argument, Arguments};
