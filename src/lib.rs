@@ -43,10 +43,13 @@ fn expand(
         // we make a backup for later use statement
         vis: original_visibility,
         ident: ref type_name,
+        ref generics,
         ..
     } = input;
     // Override visibility to public since the struct is in a private module
     input.vis = Visibility::Public(Pub::default());
+
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     let syn::Data::Struct(ref data_struct) = *data else {
         return Err(syn::Error::new(
@@ -62,9 +65,11 @@ fn expand(
         ));
     }
     let mut fields = data_struct.fields.iter();
-    match (fields.next(), fields.next()) {
+    let inner_type = match (fields.next(), fields.next()) {
         // Exactly one private field
-        (Some(field), None) if matches!(field.vis, Visibility::Inherited) => (),
+        (Some(field), None) if matches!(field.vis, Visibility::Inherited) => {
+            &field.ty
+        },
         (Some(field), None) => {
             return Err(syn::Error::new_spanned(
                 &field.vis,
@@ -83,7 +88,7 @@ fn expand(
                 "nnn can only be used on structs with exactly one field.",
             ));
         },
-    }
+    };
 
     let args = Arguments::from(
         Punctuated::<Argument, syn::Token![,]>::parse_terminated
@@ -97,6 +102,14 @@ fn expand(
             use super::*;
 
             #input
+
+            impl #impl_generics #type_name #ty_generics #where_clause {
+                #[inline]
+                #[must_use]
+                pub const fn into_inner(self) -> #inner_type {
+                    self.0
+                }
+            }
 
             #[cfg(test)]
             mod tests {
