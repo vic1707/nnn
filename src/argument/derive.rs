@@ -1,5 +1,7 @@
+/* Crate imports */
+use crate::gen;
 /* Dependencies */
-use quote::ToTokens as _;
+use quote::{quote, ToTokens as _};
 use syn::parse::{Parse, ParseStream};
 
 #[derive(Debug)]
@@ -38,5 +40,21 @@ impl Parse for Derive {
             )),
             _ => Ok(Self::Transparent(trait_path)),
         }
+    }
+}
+
+impl gen::Gen for Derive {
+    fn gen_impl(&self, _: &syn::Ident, _: &syn::Type) -> gen::Implementation {
+        let trait_name = self.trait_name();
+        gen::Implementation::MacroAttribute(
+            quote! {
+                #[derive(#trait_name)]
+            }
+            .into(),
+        )
+    }
+
+    fn gen_tests(&self, _: &syn::Ident) -> proc_macro2::TokenStream {
+        quote! {}
     }
 }
