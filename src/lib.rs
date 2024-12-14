@@ -97,12 +97,17 @@ fn expand(
     );
     eprintln!("ATTRIBUTES PARSED: {args:#?}");
 
+    let impls = args.get_impls(type_name, inner_type);
+    let (impl_blocks, macro_attrs, bare_impls) =
+        gen::Implementation::separate_variants(&impls);
+
     let error_name = format_ident!("{type_name}Error");
     Ok(quote! {
         #[doc(hidden)]
         mod __private {
             use super::*;
 
+            #(#macro_attrs)*
             #input
 
             #[derive(Debug)]
@@ -119,7 +124,11 @@ fn expand(
                 pub fn try_new(value: #inner_type) -> Result<Self, #error_name> {
                     Ok(Self(value))
                 }
+
+                #(#bare_impls)*
             }
+
+            #(#impl_blocks)*
 
             #[cfg(test)]
             mod tests {

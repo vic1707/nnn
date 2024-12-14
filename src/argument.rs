@@ -8,6 +8,7 @@ use self::{
     associated_const::AssociatedConst, default::Default, derive::Derive,
     new_unchecked::NewUnchecked,
 };
+use crate::gen::{self, Gen as _};
 /* Dependencies */
 use syn::{
     parse::{Parse, ParseStream},
@@ -21,6 +22,35 @@ pub(crate) struct Arguments {
     derives: Vec<Derive>,
     default: Option<Default>,
     new_unchecked: Option<NewUnchecked>,
+}
+
+impl Arguments {
+    pub(crate) fn get_impls(
+        &self,
+        type_name: &syn::Ident,
+        inner_type: &syn::Type,
+    ) -> Vec<gen::Implementation> {
+        (self
+            .consts
+            .iter()
+            .map(|cst| cst.gen_impl(type_name, inner_type)))
+        .chain(
+            self.derives
+                .iter()
+                .map(|der| der.gen_impl(type_name, inner_type)),
+        )
+        .chain(
+            self.default
+                .iter()
+                .map(|def| def.gen_impl(type_name, inner_type)),
+        )
+        .chain(
+            self.new_unchecked
+                .iter()
+                .map(|nu| nu.gen_impl(type_name, inner_type)),
+        )
+        .collect()
+    }
 }
 
 impl From<Punctuated<Argument, Comma>> for Arguments {
