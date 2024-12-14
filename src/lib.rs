@@ -11,7 +11,7 @@ mod utils;
 use argument::{Argument, Arguments};
 use utils::syn_ext::SynDataExt as _;
 /* Dependencies imports */
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::{
     parse::Parser as _, punctuated::Punctuated, token::Pub, Fields, Visibility,
 };
@@ -96,6 +96,7 @@ fn expand(
     );
     eprintln!("ATTRIBUTES PARSED: {args:#?}");
 
+    let error_name = format_ident!("{type_name}Error");
     Ok(quote! {
         #[doc(hidden)]
         mod __private {
@@ -103,11 +104,19 @@ fn expand(
 
             #input
 
+            #[derive(Debug)]
+            pub enum #error_name {}
+
             impl #impl_generics #type_name #ty_generics #where_clause {
                 #[inline]
                 #[must_use]
                 pub const fn into_inner(self) -> #inner_type {
                     self.0
+                }
+                #[inline]
+                #[must_use]
+                pub fn try_new(value: #inner_type) -> Result<Self, #error_name> {
+                    Ok(Self(value))
                 }
             }
 
@@ -119,5 +128,7 @@ fn expand(
 
         #[allow(clippy::pub_use, reason = "_")]
         #original_visibility use __private::#type_name;
+        #[allow(clippy::pub_use, reason = "_")]
+        #original_visibility use __private::#error_name;
     })
 }
