@@ -26,7 +26,7 @@ impl Parse for AssociatedConst {
 }
 
 impl gen::Gen for AssociatedConst {
-    fn gen_impl(&self, _: &syn::Ident, _: &syn::Type) -> gen::Implementation {
+    fn gen_impl(&self, _: &crate::NNNType) -> gen::Implementation {
         let visibility = &self.visibility;
         let const_name = &self.name;
         let value = &self.value;
@@ -39,8 +39,9 @@ impl gen::Gen for AssociatedConst {
         )
     }
 
-    fn gen_tests(&self, type_name: &syn::Ident) -> proc_macro2::TokenStream {
+    fn gen_tests(&self, new_type: &crate::NNNType) -> proc_macro2::TokenStream {
         let const_name = &self.name;
+        let type_name = new_type.type_name();
 
         let err_msg = format!(
             "Type `{type_name}` has invalid value for associated const `{const_name}`.",

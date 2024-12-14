@@ -44,7 +44,7 @@ impl Parse for Derive {
 }
 
 impl gen::Gen for Derive {
-    fn gen_impl(&self, _: &syn::Ident, _: &syn::Type) -> gen::Implementation {
+    fn gen_impl(&self, _: &crate::NNNType) -> gen::Implementation {
         let trait_name = self.trait_name();
         gen::Implementation::MacroAttribute(
             quote! {
@@ -54,7 +54,7 @@ impl gen::Gen for Derive {
         )
     }
 
-    fn gen_tests(&self, _: &syn::Ident) -> proc_macro2::TokenStream {
+    fn gen_tests(&self, _: &crate::NNNType) -> proc_macro2::TokenStream {
         quote! {}
     }
 }

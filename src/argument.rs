@@ -27,39 +27,23 @@ pub(crate) struct Arguments {
 impl Arguments {
     pub(crate) fn get_impls(
         &self,
-        type_name: &syn::Ident,
-        inner_type: &syn::Type,
+        new_type: &crate::NNNType,
     ) -> Vec<gen::Implementation> {
-        (self
-            .consts
-            .iter()
-            .map(|cst| cst.gen_impl(type_name, inner_type)))
-        .chain(
-            self.derives
-                .iter()
-                .map(|der| der.gen_impl(type_name, inner_type)),
-        )
-        .chain(
-            self.default
-                .iter()
-                .map(|def| def.gen_impl(type_name, inner_type)),
-        )
-        .chain(
-            self.new_unchecked
-                .iter()
-                .map(|nu| nu.gen_impl(type_name, inner_type)),
-        )
-        .collect()
+        (self.consts.iter().map(|cst| cst.gen_impl(new_type)))
+            .chain(self.derives.iter().map(|der| der.gen_impl(new_type)))
+            .chain(self.default.iter().map(|def| def.gen_impl(new_type)))
+            .chain(self.new_unchecked.iter().map(|nu| nu.gen_impl(new_type)))
+            .collect()
     }
 
     pub(crate) fn get_tests(
         &self,
-        type_name: &syn::Ident,
+        new_type: &crate::NNNType,
     ) -> Vec<proc_macro2::TokenStream> {
-        (self.consts.iter().map(|cst| cst.gen_tests(type_name)))
-            .chain(self.derives.iter().map(|der| der.gen_tests(type_name)))
-            .chain(self.default.iter().map(|def| def.gen_tests(type_name)))
-            .chain(self.new_unchecked.iter().map(|nu| nu.gen_tests(type_name)))
+        (self.consts.iter().map(|cst| cst.gen_tests(new_type)))
+            .chain(self.derives.iter().map(|der| der.gen_tests(new_type)))
+            .chain(self.default.iter().map(|def| def.gen_tests(new_type)))
+            .chain(self.new_unchecked.iter().map(|nu| nu.gen_tests(new_type)))
             .collect()
     }
 }

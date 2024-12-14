@@ -7,11 +7,9 @@ use quote::quote;
 pub(crate) struct NewUnchecked;
 
 impl gen::Gen for NewUnchecked {
-    fn gen_impl(
-        &self,
-        _: &syn::Ident,
-        inner_type: &syn::Type,
-    ) -> gen::Implementation {
+    fn gen_impl(&self, new_type: &crate::NNNType) -> gen::Implementation {
+        let inner_type = new_type.inner_type();
+
         gen::Implementation::BareImpl(
             quote! {
                 #[inline]
@@ -24,7 +22,7 @@ impl gen::Gen for NewUnchecked {
         )
     }
 
-    fn gen_tests(&self, _: &syn::Ident) -> proc_macro2::TokenStream {
+    fn gen_tests(&self, _: &crate::NNNType) -> proc_macro2::TokenStream {
         quote! {}
     }
 }

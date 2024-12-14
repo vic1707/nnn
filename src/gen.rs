@@ -4,12 +4,8 @@ mod gen_utils;
 use self::gen_utils::ts_new_type;
 
 pub(crate) trait Gen {
-    fn gen_tests(&self, type_name: &syn::Ident) -> proc_macro2::TokenStream;
-    fn gen_impl(
-        &self,
-        type_name: &syn::Ident,
-        inner_type: &syn::Type,
-    ) -> Implementation;
+    fn gen_tests(&self, new_type: &crate::NNNType) -> proc_macro2::TokenStream;
+    fn gen_impl(&self, new_type: &crate::NNNType) -> Implementation;
 }
 
 #[derive(Debug)]

@@ -10,11 +10,10 @@ pub(crate) enum Default {
 }
 
 impl gen::Gen for Default {
-    fn gen_impl(
-        &self,
-        type_name: &syn::Ident,
-        inner_type: &syn::Type,
-    ) -> gen::Implementation {
+    fn gen_impl(&self, new_type: &crate::NNNType) -> gen::Implementation {
+        let inner_type = new_type.inner_type();
+        let type_name = new_type.type_name();
+
         let default_value = match *self {
             Self::WithInnerDefault => quote! { #inner_type::default() },
             Self::WithValue(ref expr) => quote! { #expr },
@@ -33,7 +32,8 @@ impl gen::Gen for Default {
         )
     }
 
-    fn gen_tests(&self, type_name: &syn::Ident) -> proc_macro2::TokenStream {
+    fn gen_tests(&self, new_type: &crate::NNNType) -> proc_macro2::TokenStream {
+        let type_name = new_type.type_name();
         let err_msg = format!("Type `{type_name}` has invalid default value.",);
 
         quote! {
