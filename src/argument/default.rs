@@ -13,6 +13,8 @@ impl gen::Gen for Default {
     fn gen_impl(&self, new_type: &crate::NNNType) -> gen::Implementation {
         let inner_type = new_type.inner_type();
         let type_name = new_type.type_name();
+        let (impl_generics, ty_generics, where_clause) =
+            new_type.generics().split_for_impl();
 
         let default_value = match *self {
             Self::WithInnerDefault => quote! { #inner_type::default() },
@@ -21,7 +23,7 @@ impl gen::Gen for Default {
 
         gen::Implementation::ImplBlock(
             quote! {
-                impl ::core::default::Default for #type_name {
+                impl #impl_generics ::core::default::Default for #type_name #ty_generics #where_clause {
                     fn default() -> Self {
                         #[doc = "Safety: Checked by automatically generated test."]
                         unsafe { Self::try_new(#default_value).unwrap_unchecked() }
