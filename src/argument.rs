@@ -51,6 +51,17 @@ impl Arguments {
         )
         .collect()
     }
+
+    pub(crate) fn get_tests(
+        &self,
+        type_name: &syn::Ident,
+    ) -> Vec<proc_macro2::TokenStream> {
+        (self.consts.iter().map(|cst| cst.gen_tests(type_name)))
+            .chain(self.derives.iter().map(|der| der.gen_tests(type_name)))
+            .chain(self.default.iter().map(|def| def.gen_tests(type_name)))
+            .chain(self.new_unchecked.iter().map(|nu| nu.gen_tests(type_name)))
+            .collect()
+    }
 }
 
 impl From<Punctuated<Argument, Comma>> for Arguments {

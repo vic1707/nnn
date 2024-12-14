@@ -1,4 +1,4 @@
-#![expect(clippy::todo, dead_code, reason = "WIP")]
+#![expect(clippy::todo, reason = "WIP")]
 #![expect(
     clippy::print_stderr,
     clippy::use_debug,
@@ -97,6 +97,7 @@ fn expand(
     );
     eprintln!("ATTRIBUTES PARSED: {args:#?}");
 
+    let tests = args.get_tests(type_name);
     let impls = args.get_impls(type_name, inner_type);
     let (impl_blocks, macro_attrs, bare_impls) =
         gen::Implementation::separate_variants(&impls);
@@ -133,6 +134,8 @@ fn expand(
             #[cfg(test)]
             mod tests {
                 use super::*;
+
+                #(#tests)*
             }
         }
 
