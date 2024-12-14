@@ -3,10 +3,11 @@ mod associated_const;
 mod default;
 mod derive;
 mod new_unchecked;
+mod nnn_derive;
 /* Crate imports */
 use self::{
     associated_const::AssociatedConst, default::Default, derive::Derive,
-    new_unchecked::NewUnchecked,
+    new_unchecked::NewUnchecked, nnn_derive::NNNDerive,
 };
 use crate::gen::{self, Gen as _};
 /* Dependencies */
@@ -18,6 +19,7 @@ use syn::{
 
 #[derive(Debug, Default)]
 pub(crate) struct Arguments {
+    nnn_derives: Vec<NNNDerive>,
     consts: Vec<AssociatedConst>,
     derives: Vec<Derive>,
     default: Option<Default>,
@@ -29,7 +31,8 @@ impl Arguments {
         &self,
         new_type: &crate::NNNType,
     ) -> Vec<gen::Implementation> {
-        (self.consts.iter().map(|cst| cst.gen_impl(new_type)))
+        (self.nnn_derives.iter().map(|der| der.gen_impl(new_type)))
+            .chain(self.consts.iter().map(|cst| cst.gen_impl(new_type)))
             .chain(self.derives.iter().map(|der| der.gen_impl(new_type)))
             .chain(self.default.iter().map(|def| def.gen_impl(new_type)))
             .chain(self.new_unchecked.iter().map(|nu| nu.gen_impl(new_type)))
@@ -40,7 +43,8 @@ impl Arguments {
         &self,
         new_type: &crate::NNNType,
     ) -> Vec<proc_macro2::TokenStream> {
-        (self.consts.iter().map(|cst| cst.gen_tests(new_type)))
+        (self.nnn_derives.iter().map(|der| der.gen_tests(new_type)))
+            .chain(self.consts.iter().map(|cst| cst.gen_tests(new_type)))
             .chain(self.derives.iter().map(|der| der.gen_tests(new_type)))
             .chain(self.default.iter().map(|def| def.gen_tests(new_type)))
             .chain(self.new_unchecked.iter().map(|nu| nu.gen_tests(new_type)))
@@ -53,6 +57,9 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
         let mut args = Self::default();
         for arg in punctuated_args {
             match arg {
+                Argument::NNNDerive(derives) => {
+                    args.nnn_derives.extend(derives);
+                },
                 Argument::Consts(consts) => args.consts.extend(consts),
                 Argument::Derive(derives) => args.derives.extend(derives),
                 Argument::Default(default) => args.default = Some(default),
@@ -65,6 +72,7 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
 
 #[derive(Debug)]
 pub(crate) enum Argument {
+    NNNDerive(Punctuated<NNNDerive, Comma>),
     Consts(Punctuated<AssociatedConst, Comma>),
     Derive(Punctuated<Derive, Comma>),
     Default(Default),
@@ -75,6 +83,14 @@ impl Parse for Argument {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let ident = input.parse::<syn::Ident>()?;
         let arg = match ident.to_string().as_str() {
+            "nnn_derive" => {
+                let content;
+                syn::parenthesized!(content in input);
+                Self::NNNDerive(
+                    content
+                        .parse_terminated(NNNDerive::parse, syn::Token![,])?,
+                )
+            },
             "consts" => {
                 let content;
                 syn::parenthesized!(content in input);
