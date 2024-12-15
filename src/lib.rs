@@ -1,9 +1,4 @@
 #![expect(clippy::todo, reason = "WIP")]
-#![expect(
-    clippy::print_stderr,
-    clippy::use_debug,
-    reason = "Usefull for debuging"
-)]
 /* Modules */
 mod argument;
 mod gen;
@@ -44,7 +39,6 @@ fn expand(
         Punctuated::<Argument, syn::Token![,]>::parse_terminated
             .parse(nnn_args)?,
     );
-    eprintln!("ATTRIBUTES PARSED: {args:#?}");
 
     let tests = args.get_tests(&new_type);
     let impls = args.get_impls(&new_type);
