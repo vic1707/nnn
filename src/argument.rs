@@ -4,10 +4,11 @@ mod default;
 mod derive;
 mod new_unchecked;
 mod nnn_derive;
+mod validator;
 /* Crate imports */
 use self::{
     associated_const::AssociatedConst, default::Default, derive::Derive,
-    new_unchecked::NewUnchecked, nnn_derive::NNNDerive,
+    new_unchecked::NewUnchecked, nnn_derive::NNNDerive, validator::Validator,
 };
 use crate::gen::{self, Gen as _};
 /* Dependencies */
@@ -24,6 +25,7 @@ pub(crate) struct Arguments {
     derives: Vec<Derive>,
     default: Option<Default>,
     new_unchecked: Option<NewUnchecked>,
+    validators: Vec<Validator>,
 }
 
 impl Arguments {
@@ -64,6 +66,9 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
                 Argument::Derive(derives) => args.derives.extend(derives),
                 Argument::Default(default) => args.default = Some(default),
                 Argument::NewUnchecked(nu) => args.new_unchecked = Some(nu),
+                Argument::Validators(validators) => {
+                    args.validators.extend(validators);
+                },
             }
         }
         args
@@ -77,6 +82,7 @@ pub(crate) enum Argument {
     Derive(Punctuated<Derive, Comma>),
     Default(Default),
     NewUnchecked(NewUnchecked),
+    Validators(Punctuated<Validator, Comma>),
 }
 
 impl Parse for Argument {
@@ -119,6 +125,14 @@ impl Parse for Argument {
                 }
             },
             "new_unchecked" => Self::NewUnchecked(NewUnchecked),
+            "validators" => {
+                let content;
+                syn::parenthesized!(content in input);
+                Self::Validators(
+                    content
+                        .parse_terminated(Validator::parse, syn::Token![,])?,
+                )
+            },
             // TODO: remove branch
             _ => {
                 return Err(syn::Error::new_spanned(ident, "Unknon argument."))
