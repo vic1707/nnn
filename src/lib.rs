@@ -58,7 +58,8 @@ fn expand(
             impl #impl_generics #type_name #ty_generics #where_clause {
                 #[inline]
                 #[must_use]
-                pub const fn into_inner(self) -> #inner_type {
+                // TODO: Can it be const ?
+                pub fn into_inner(self) -> #inner_type {
                     self.0
                 }
                 #[inline]
