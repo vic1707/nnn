@@ -119,8 +119,10 @@ impl Parse for Argument {
                 }
             },
             "new_unchecked" => Self::NewUnchecked(NewUnchecked),
-            // Branch will be removed
-            _ => todo!("Unknown argument"),
+            // TODO: remove branch
+            _ => {
+                return Err(syn::Error::new_spanned(ident, "Unknon argument."))
+            },
         };
 
         if !input.peek(syn::Token![,]) && !input.is_empty() {

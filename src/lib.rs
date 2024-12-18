@@ -1,4 +1,3 @@
-#![expect(clippy::todo, reason = "WIP")]
 /* Modules */
 mod argument;
 mod gen;
