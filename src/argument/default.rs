@@ -17,7 +17,7 @@ impl gen::Gen for Default {
             new_type.generics().split_for_impl();
 
         let default_value = match *self {
-            Self::WithInnerDefault => quote! { #inner_type::default() },
+            Self::WithInnerDefault => quote! { <#inner_type>::default() },
             Self::WithValue(ref expr) => quote! { #expr },
         };
 
