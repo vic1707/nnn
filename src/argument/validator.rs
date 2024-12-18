@@ -1,3 +1,5 @@
+/* Crate imports */
+use crate::utils::regex_input::RegexInput;
 /* Dependencies */
 use syn::{
     parse::{Parse, ParseStream},
@@ -22,7 +24,7 @@ pub(crate) enum Validator {
     // Floats
     Finite,
     // String
-    // TODO: Regex,
+    Regex(RegexInput),
     // Commons
     // TODO: also takes in an error type
     // With
@@ -81,6 +83,11 @@ impl Parse for Validator {
                 Self::MaxOrEq(value)
             },
             "finite" => Self::Finite,
+            "regex" => {
+                input.parse::<syn::Token![=]>()?;
+                let value = input.parse::<RegexInput>()?;
+                Self::Regex(value)
+            },
             _ => {
                 return Err(syn::Error::new_spanned(name, "Unknown validator."))
             },
