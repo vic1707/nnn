@@ -23,6 +23,7 @@ pub(crate) enum Validator {
     MaxOrEq(syn::Lit),
     // Floats
     Finite,
+    NotNAN,
     // String
     Regex(RegexInput),
     // Commons
@@ -83,6 +84,7 @@ impl Parse for Validator {
                 Self::MaxOrEq(value)
             },
             "finite" => Self::Finite,
+            "not_nan" => Self::NotNAN,
             "regex" => {
                 input.parse::<syn::Token![=]>()?;
                 let value = input.parse::<RegexInput>()?;
