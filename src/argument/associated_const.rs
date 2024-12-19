@@ -2,7 +2,7 @@
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream};
 /* Crate imports */
-use crate::gen;
+use crate::{gen, utils::syn_ext::SynParseBufferExt as _};
 
 #[derive(Debug)]
 pub(crate) struct AssociatedConst {
@@ -14,9 +14,7 @@ pub(crate) struct AssociatedConst {
 impl Parse for AssociatedConst {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let visibility = input.parse::<syn::Visibility>()?;
-        let name = input.parse::<syn::Ident>()?;
-        let _: syn::Token![=] = input.parse()?;
-        let value = input.parse::<syn::Expr>()?;
+        let (name, value) = input.parse_assign::<syn::Expr>()?;
         Ok(Self {
             visibility,
             name,

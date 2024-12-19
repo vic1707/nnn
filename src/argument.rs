@@ -10,7 +10,10 @@ use self::{
     associated_const::AssociatedConst, default::Default, derive::Derive,
     new_unchecked::NewUnchecked, nnn_derive::NNNDerive, validator::Validator,
 };
-use crate::gen::{self, Gen as _};
+use crate::{
+    gen::{self, Gen as _},
+    utils::syn_ext::SynParseBufferExt as _,
+};
 /* Dependencies */
 use syn::{
     parse::{Parse, ParseStream},
@@ -90,48 +93,21 @@ impl Parse for Argument {
         let ident = input.parse::<syn::Ident>()?;
         let arg = match ident.to_string().as_str() {
             "nnn_derive" => {
-                let content;
-                syn::parenthesized!(content in input);
-                Self::NNNDerive(
-                    content
-                        .parse_terminated(NNNDerive::parse, syn::Token![,])?,
-                )
+                Self::NNNDerive(input.parse_parenthesized::<NNNDerive>()?)
             },
             "consts" => {
-                let content;
-                syn::parenthesized!(content in input);
-                Self::Consts(
-                    content.parse_terminated(
-                        AssociatedConst::parse,
-                        syn::Token![,],
-                    )?,
-                )
+                Self::Consts(input.parse_parenthesized::<AssociatedConst>()?)
             },
-            "derive" => {
-                let content;
-                syn::parenthesized!(content in input);
-                Self::Derive(
-                    content.parse_terminated(Derive::parse, syn::Token![,])?,
-                )
-            },
+            "derive" => Self::Derive(input.parse_parenthesized::<Derive>()?),
             "default" => {
-                if input.peek(syn::Token![=]) {
-                    let _: syn::Token![=] = input.parse()?;
-                    Self::Default(Default::WithValue(
-                        input.parse::<syn::Expr>()?,
-                    ))
-                } else {
-                    Self::Default(Default::WithInnerDefault)
-                }
+                Self::Default(match input.parse_equal::<syn::Expr>() {
+                    Ok(expr) => Default::WithValue(expr),
+                    Err(_err) => Default::WithInnerDefault,
+                })
             },
             "new_unchecked" => Self::NewUnchecked(NewUnchecked),
             "validators" => {
-                let content;
-                syn::parenthesized!(content in input);
-                Self::Validators(
-                    content
-                        .parse_terminated(Validator::parse, syn::Token![,])?,
-                )
+                Self::Validators(input.parse_parenthesized::<Validator>()?)
             },
             // TODO: remove branch
             _ => {

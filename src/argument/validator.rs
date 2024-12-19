@@ -1,5 +1,5 @@
 /* Crate imports */
-use crate::utils::regex_input::RegexInput;
+use crate::utils::{regex_input::RegexInput, syn_ext::SynParseBufferExt as _};
 /* Dependencies */
 use syn::{
     parse::{Parse, ParseStream},
@@ -10,21 +10,21 @@ use syn::{
 #[derive(Debug)]
 pub(crate) enum Validator {
     // Containers
+    NotEmpty,
     Each(Punctuated<Validator, Comma>),
     MinLength(syn::Lit),
     Length(syn::Lit),
     MaxLength(syn::Lit),
-    NotEmpty,
-    // Numbers
+    // Numerics
     Min(syn::Lit),
     MinOrEq(syn::Lit),
     Exactly(syn::Lit),
     Max(syn::Lit),
     MaxOrEq(syn::Lit),
-    // Floats
+    // Float specifics
     Finite,
     NotNAN,
-    // String
+    // String specifics
     Regex(RegexInput),
     // Commons
     // TODO: also takes in an error type
@@ -35,61 +35,23 @@ impl Parse for Validator {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let name = input.parse::<syn::Ident>()?;
         let validator = match name.to_string().as_str() {
-            "each" => {
-                let content;
-                syn::parenthesized!(content in input);
-                Self::Each(
-                    content.parse_terminated(Self::parse, syn::Token![,])?,
-                )
-            },
-            "min_length" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<syn::Lit>()?;
-                Self::MinLength(value)
-            },
-            "length" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<syn::Lit>()?;
-                Self::Length(value)
-            },
-            "max_length" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<syn::Lit>()?;
-                Self::MaxLength(value)
-            },
+            // Containers
             "not_empty" => Self::NotEmpty,
-            "min" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<syn::Lit>()?;
-                Self::Min(value)
-            },
-            "min_or_eq" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<syn::Lit>()?;
-                Self::MinOrEq(value)
-            },
-            "exactly" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<syn::Lit>()?;
-                Self::Exactly(value)
-            },
-            "max" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<syn::Lit>()?;
-                Self::Max(value)
-            },
-            "max_or_eq" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<syn::Lit>()?;
-                Self::MaxOrEq(value)
-            },
+            "each" => Self::Each(input.parse_parenthesized::<Self>()?),
+            "min_length" => Self::MinLength(input.parse_equal::<syn::Lit>()?),
+            "length" => Self::Length(input.parse_equal::<syn::Lit>()?),
+            "max_length" => Self::MaxLength(input.parse_equal::<syn::Lit>()?),
+            // Numerics
+            "min" => Self::Min(input.parse_equal::<syn::Lit>()?),
+            "min_or_eq" => Self::MinOrEq(input.parse_equal::<syn::Lit>()?),
+            "exactly" => Self::Exactly(input.parse_equal::<syn::Lit>()?),
+            "max" => Self::Max(input.parse_equal::<syn::Lit>()?),
+            "max_or_eq" => Self::MaxOrEq(input.parse_equal::<syn::Lit>()?),
+            // Float specifics
             "finite" => Self::Finite,
             "not_nan" => Self::NotNAN,
-            "regex" => {
-                input.parse::<syn::Token![=]>()?;
-                let value = input.parse::<RegexInput>()?;
-                Self::Regex(value)
-            },
+            // String specifics
+            "regex" => Self::Regex(input.parse_equal::<RegexInput>()?),
             _ => {
                 return Err(syn::Error::new_spanned(name, "Unknown validator."))
             },
