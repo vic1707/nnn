@@ -11,6 +11,7 @@ use syn::{
 
 #[derive(Debug)]
 pub(crate) enum Derive {
+    Deserialize(syn::Path),
     /// A derive that will be passed down transparently.
     Transparent(syn::Path),
 }
@@ -35,6 +36,7 @@ impl Parse for Derive {
                 trait_path,
                 "To derive the `Default` trait, use the `default` or `default = ..` argument."
             )),
+            "Deserialize" => Ok(Self::Deserialize(trait_path)),
             _ => Ok(Self::Transparent(trait_path)),
         }
     }
@@ -43,9 +45,17 @@ impl Parse for Derive {
 impl gen::Gen for Derive {
     fn gen_impl(
         &self,
-        _: &crate::NNNType,
+        new_type: &crate::NNNType,
     ) -> impl Iterator<Item = gen::Implementation> {
         iter::once(gen::Implementation::Attribute(match *self {
+            Self::Deserialize(ref path) => {
+                let inner_type =
+                    new_type.inner_type().to_token_stream().to_string();
+                parse_quote! {
+                    #[derive(#path)]
+                    #[serde(try_from = #inner_type)]
+                }
+            },
             Self::Transparent(ref path) => parse_quote! { #[derive(#path)] },
         }))
     }
