@@ -24,7 +24,7 @@ pub(crate) enum Implementation {
     /// an item within an impl block
     ImplItem(ImplItem),
     /// A macro attribute for the generated [`crate::NNNType`]
-    Attribute(syn::Attribute),
+    Attribute(Vec<syn::Attribute>),
 
     ErrorVariant(Punctuated<syn::Variant, Comma>),
     ValidityCheck(syn::Block),
@@ -52,10 +52,13 @@ impl Implementation {
             Self::ImplItem(ref el) => Some(el),
             _ => None,
         });
-        let proc_macro_attrs = impls.iter().filter_map(|item| match *item {
-            Self::Attribute(ref el) => Some(el),
-            _ => None,
-        });
+        let proc_macro_attrs = impls
+            .iter()
+            .filter_map(|item| match *item {
+                Self::Attribute(ref el) => Some(el),
+                _ => None,
+            })
+            .flatten();
 
         let err_variants = impls.iter().filter_map(|item| match *item {
             Self::ErrorVariant(ref el) => Some(el),
