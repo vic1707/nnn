@@ -18,8 +18,10 @@ pub(crate) enum Validator {
     NotEmpty,
     Each(Punctuated<Self, Comma>),
     MinLength(syn::Lit),
+    MinLengthOrEq(syn::Lit),
     Length(syn::Lit),
     MaxLength(syn::Lit),
+    MaxLengthOrEq(syn::Lit),
     // Numerics
     Min(syn::Lit),
     MinOrEq(syn::Lit),
@@ -28,6 +30,7 @@ pub(crate) enum Validator {
     MaxOrEq(syn::Lit),
     // Float specifics
     Finite,
+    NotInfinite,
     NotNAN,
     // String specifics
     Regex(RegexInput),
@@ -50,6 +53,7 @@ impl gen::Gen for Validator {
     }
 }
 
+#[expect(clippy::too_many_lines, reason = "Lots of validators.")]
 impl Validator {
     pub(crate) fn variant(&self) -> Punctuated<syn::Variant, Comma> {
         match *self {
@@ -63,8 +67,10 @@ impl Validator {
                 }
             },
             Self::MinLength(_) => parse_quote! { MinLength },
+            Self::MinLengthOrEq(_) => parse_quote! { MinLengthOrEq },
             Self::Length(_) => parse_quote! { Length },
             Self::MaxLength(_) => parse_quote! { MaxLength },
+            Self::MaxLengthOrEq(_) => parse_quote! { MaxLengthOrEq },
             // Numerics
             Self::Min(_) => parse_quote! { Min },
             Self::MinOrEq(_) => parse_quote! { MinOrEq },
@@ -73,6 +79,7 @@ impl Validator {
             Self::MaxOrEq(_) => parse_quote! { MaxOrEq },
             // Float specifics
             Self::Finite => parse_quote! { Finite },
+            Self::NotInfinite => parse_quote! { NotInfinite },
             Self::NotNAN => parse_quote! { NotNAN },
             // String specifics
             Self::Regex(_) => parse_quote! { Regex },
@@ -105,11 +112,17 @@ impl Validator {
             Self::MinLength(ref val) => {
                 parse_quote! {{ if value.len() < #val { return Err(#error_type::MinLength) } }}
             },
+            Self::MinLengthOrEq(ref val) => {
+                parse_quote! {{ if value.len() <= #val { return Err(#error_type::MinLengthOrEq) } }}
+            },
             Self::Length(ref val) => {
                 parse_quote! {{ if value.len() != #val { return Err(#error_type::Length) } }}
             },
             Self::MaxLength(ref val) => {
                 parse_quote! {{ if value.len() > #val { return Err(#error_type::MaxLength) } }}
+            },
+            Self::MaxLengthOrEq(ref val) => {
+                parse_quote! {{ if value.len() >= #val { return Err(#error_type::MaxLengthOrEq) } }}
             },
             // Numerics
             Self::Min(ref val) => {
@@ -130,6 +143,9 @@ impl Validator {
             // Float specifics
             Self::Finite => {
                 parse_quote! {{ if ! value.is_finite() { return Err(#error_type::Finite) } }}
+            },
+            Self::NotInfinite => {
+                parse_quote! {{ if value.is_infinite() { return Err(#error_type::NotInfinite) } }}
             },
             Self::NotNAN => {
                 parse_quote! {{ if value.is_nan() { return Err(#error_type::NotNAN) } }}
@@ -172,6 +188,13 @@ impl Validator {
                 );
                 parse_quote! { Self::MinLength => write!(fmt, #msg) }
             },
+            Self::MinLengthOrEq(ref val) => {
+                let msg = format!(
+                    "[{type_name}] Length should be greater or equal to {}.",
+                    val.to_token_stream()
+                );
+                parse_quote! { Self::MinLengthOrEq => write!(fmt, #msg) }
+            },
             Self::Length(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be exactly {}.",
@@ -185,6 +208,13 @@ impl Validator {
                     val.to_token_stream()
                 );
                 parse_quote! { Self::MaxLength => write!(fmt, #msg) }
+            },
+            Self::MaxLengthOrEq(ref val) => {
+                let msg = format!(
+                    "[{type_name}] Length should be lesser or equal to {}.",
+                    val.to_token_stream()
+                );
+                parse_quote! { Self::MaxLengthOrEq => write!(fmt, #msg) }
             },
             // Numerics
             Self::Min(ref val) => {
@@ -229,6 +259,11 @@ impl Validator {
                 );
                 parse_quote! { Self::Finite => write!(fmt, #msg) }
             },
+            Self::NotInfinite => {
+                let msg =
+                    format!("[{type_name}] Value should not be infinite.");
+                parse_quote! { Self::NotInfinite => write!(fmt, #msg) }
+            },
             Self::NotNAN => {
                 let msg = format!("[{type_name}] Value should not be NAN.");
                 parse_quote! { Self::NotNAN => write!(fmt, #msg) }
@@ -252,8 +287,14 @@ impl Parse for Validator {
             "not_empty" => Self::NotEmpty,
             "each" => Self::Each(input.parse_parenthesized::<Self>()?),
             "min_length" => Self::MinLength(input.parse_equal::<syn::Lit>()?),
+            "min_length_or_eq" => {
+                Self::MinLengthOrEq(input.parse_equal::<syn::Lit>()?)
+            },
             "length" => Self::Length(input.parse_equal::<syn::Lit>()?),
             "max_length" => Self::MaxLength(input.parse_equal::<syn::Lit>()?),
+            "max_length_or_eq" => {
+                Self::MaxLengthOrEq(input.parse_equal::<syn::Lit>()?)
+            },
             // Numerics
             "min" => Self::Min(input.parse_equal::<syn::Lit>()?),
             "min_or_eq" => Self::MinOrEq(input.parse_equal::<syn::Lit>()?),
@@ -262,6 +303,7 @@ impl Parse for Validator {
             "max_or_eq" => Self::MaxOrEq(input.parse_equal::<syn::Lit>()?),
             // Float specifics
             "finite" => Self::Finite,
+            "not_infinite" => Self::NotInfinite,
             "not_nan" => Self::NotNAN,
             // String specifics
             "regex" => Self::Regex(input.parse_equal::<RegexInput>()?),
