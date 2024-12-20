@@ -1,8 +1,13 @@
+/* Built-in imports */
+use core::iter;
 /* Crate imports */
 use crate::gen;
 /* Dependencies */
-use quote::{quote, ToTokens as _};
-use syn::parse::{Parse, ParseStream};
+use quote::ToTokens as _;
+use syn::{
+    parse::{Parse, ParseStream},
+    parse_quote,
+};
 
 #[derive(Debug)]
 /// Derives provided by the crate.
@@ -40,22 +45,25 @@ impl Parse for NNNDerive {
 }
 
 impl gen::Gen for NNNDerive {
-    fn gen_impl(&self, nnn_type: &crate::NNNType) -> gen::Implementation {
+    fn gen_impl(
+        &self,
+        nnn_type: &crate::NNNType,
+    ) -> impl Iterator<Item = gen::Implementation> {
         let type_name = nnn_type.type_name();
         let inner_type = nnn_type.inner_type();
         let error_name = nnn_type.error_name();
         let (impl_generics, ty_generics, where_clause) =
             nnn_type.generics().split_for_impl();
 
-        let ts = match *self {
-            Self::Into => quote! {
+        iter::once(gen::Implementation::ItemImpl(match *self {
+            Self::Into => parse_quote! {
                 impl #impl_generics ::core::convert::Into<#inner_type> for #type_name #ty_generics #where_clause {
                     fn into(self) -> #inner_type {
                         self.0
                     }
                 }
             },
-            Self::TryFrom => quote! {
+            Self::TryFrom => parse_quote! {
                 impl #impl_generics ::core::convert::TryFrom<#inner_type> for #type_name #ty_generics #where_clause {
                     type Error = #error_name;
                     fn try_from(value: #inner_type) -> Result<Self, Self::Error> {
@@ -63,12 +71,6 @@ impl gen::Gen for NNNDerive {
                     }
                 }
             },
-        };
-
-        gen::Implementation::ImplBlock(ts.into())
-    }
-
-    fn gen_tests(&self, _: &crate::NNNType) -> proc_macro2::TokenStream {
-        quote! {}
+        }))
     }
 }

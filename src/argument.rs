@@ -36,23 +36,31 @@ impl Arguments {
         &self,
         new_type: &crate::NNNType,
     ) -> Vec<gen::Implementation> {
-        (self.nnn_derives.iter().map(|der| der.gen_impl(new_type)))
-            .chain(self.consts.iter().map(|cst| cst.gen_impl(new_type)))
-            .chain(self.derives.iter().map(|der| der.gen_impl(new_type)))
-            .chain(self.default.iter().map(|def| def.gen_impl(new_type)))
-            .chain(self.new_unchecked.iter().map(|nu| nu.gen_impl(new_type)))
-            .collect()
+        (self
+            .nnn_derives
+            .iter()
+            .flat_map(|der| der.gen_impl(new_type)))
+        .chain(self.consts.iter().flat_map(|cst| cst.gen_impl(new_type)))
+        .chain(self.derives.iter().flat_map(|der| der.gen_impl(new_type)))
+        .chain(self.default.iter().flat_map(|def| def.gen_impl(new_type)))
+        .chain(
+            self.new_unchecked
+                .iter()
+                .flat_map(|nu| nu.gen_impl(new_type)),
+        )
+        .collect()
     }
 
     pub(crate) fn get_tests(
         &self,
         new_type: &crate::NNNType,
-    ) -> Vec<proc_macro2::TokenStream> {
+    ) -> Vec<gen::TestFn> {
         (self.nnn_derives.iter().map(|der| der.gen_tests(new_type)))
             .chain(self.consts.iter().map(|cst| cst.gen_tests(new_type)))
             .chain(self.derives.iter().map(|der| der.gen_tests(new_type)))
             .chain(self.default.iter().map(|def| def.gen_tests(new_type)))
             .chain(self.new_unchecked.iter().map(|nu| nu.gen_tests(new_type)))
+            .flatten()
             .collect()
     }
 }

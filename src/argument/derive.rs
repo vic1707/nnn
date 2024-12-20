@@ -1,8 +1,13 @@
+/* Built-in imports */
+use core::iter;
 /* Crate imports */
 use crate::gen;
 /* Dependencies */
-use quote::{quote, ToTokens as _};
-use syn::parse::{Parse, ParseStream};
+use quote::ToTokens as _;
+use syn::{
+    parse::{Parse, ParseStream},
+    parse_quote,
+};
 
 #[derive(Debug)]
 pub(crate) enum Derive {
@@ -44,17 +49,13 @@ impl Parse for Derive {
 }
 
 impl gen::Gen for Derive {
-    fn gen_impl(&self, _: &crate::NNNType) -> gen::Implementation {
+    fn gen_impl(
+        &self,
+        _: &crate::NNNType,
+    ) -> impl Iterator<Item = gen::Implementation> {
         let trait_name = self.trait_name();
-        gen::Implementation::MacroAttribute(
-            quote! {
-                #[derive(#trait_name)]
-            }
-            .into(),
-        )
-    }
-
-    fn gen_tests(&self, _: &crate::NNNType) -> proc_macro2::TokenStream {
-        quote! {}
+        iter::once(gen::Implementation::Attribute(
+            parse_quote! { #[derive(#trait_name)] },
+        ))
     }
 }

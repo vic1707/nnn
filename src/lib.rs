@@ -41,7 +41,7 @@ fn expand(
 
     let tests = args.get_tests(&new_type);
     let impls = args.get_impls(&new_type);
-    let (impl_blocks, macro_attrs, bare_impls) =
+    let (impl_blocks, bare_impls, macro_attrs) =
         gen::Implementation::separate_variants(&impls);
 
     Ok(quote! {

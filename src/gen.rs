@@ -1,36 +1,51 @@
 /* Modules */
-mod gen_utils;
-/* Crate imports */
-use self::gen_utils::ts_new_type;
+mod impl_item;
+mod test_fn;
+/* Re-exports */
+pub(crate) use self::{impl_item::ImplItem, test_fn::TestFn};
 
 pub(crate) trait Gen {
-    fn gen_tests(&self, new_type: &crate::NNNType) -> proc_macro2::TokenStream;
-    fn gen_impl(&self, new_type: &crate::NNNType) -> Implementation;
+    fn gen_tests(&self, _: &crate::NNNType) -> Option<TestFn> {
+        None
+    }
+
+    fn gen_impl(
+        &self,
+        new_type: &crate::NNNType,
+    ) -> impl Iterator<Item = Implementation>;
 }
 
 #[derive(Debug)]
 pub(crate) enum Implementation {
-    ImplBlock(ImplBlock),
-    MacroAttribute(MacroAttribute),
-    BareImpl(BareImpl),
+    /// an impl block
+    ItemImpl(syn::ItemImpl),
+    /// an item within an impl block
+    ImplItem(ImplItem),
+    /// A macro attribute for the generated [`crate::NNNType`]
+    Attribute(syn::Attribute),
 }
-
-ts_new_type!(ImplBlock);
-ts_new_type!(MacroAttribute);
-ts_new_type!(BareImpl);
 
 impl Implementation {
     pub(crate) fn separate_variants(
         impls: &[Self],
     ) -> (
-        impl Iterator<Item = &ImplBlock>,
-        impl Iterator<Item = &MacroAttribute>,
-        impl Iterator<Item = &BareImpl>,
+        impl Iterator<Item = &syn::ItemImpl>,
+        impl Iterator<Item = &ImplItem>,
+        impl Iterator<Item = &syn::Attribute>,
     ) {
-        let impl_blocks = ts_new_type!(iter_of ImplBlock in impls);
-        let proc_macro_attrs = ts_new_type!(iter_of MacroAttribute in impls);
-        let bare_impls = ts_new_type!(iter_of BareImpl in impls);
+        let impl_blocks = impls.iter().filter_map(|item| match *item {
+            Self::ItemImpl(ref el) => Some(el),
+            Self::ImplItem(_) | Self::Attribute(_) => None,
+        });
+        let impl_items = impls.iter().filter_map(|item| match *item {
+            Self::ImplItem(ref el) => Some(el),
+            Self::ItemImpl(_) | Self::Attribute(_) => None,
+        });
+        let proc_macro_attrs = impls.iter().filter_map(|item| match *item {
+            Self::Attribute(ref el) => Some(el),
+            Self::ItemImpl(_) | Self::ImplItem(_) => None,
+        });
 
-        (impl_blocks, proc_macro_attrs, bare_impls)
+        (impl_blocks, impl_items, proc_macro_attrs)
     }
 }
