@@ -47,7 +47,7 @@ fn expand(
         macro_attrs,
         err_variants,
         validity_checks,
-        err_diplay_arm,
+        err_display_arm,
     ) = gen::Implementation::separate_variants(&impls);
 
     Ok(quote! {
@@ -68,7 +68,7 @@ fn expand(
             impl ::core::fmt::Display for #error_name {
                 fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                     match *self {
-                        #(#err_diplay_arm),*
+                        #(#err_display_arm),*
                     }
                 }
             }

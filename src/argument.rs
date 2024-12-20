@@ -125,7 +125,7 @@ impl Parse for Argument {
             },
             // TODO: remove branch
             _ => {
-                return Err(syn::Error::new_spanned(ident, "Unknon argument."))
+                return Err(syn::Error::new_spanned(ident, "Unknown argument."))
             },
         };
 

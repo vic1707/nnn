@@ -65,7 +65,7 @@ impl Implementation {
             Self::ValidityCheck(ref el) => Some(el),
             _ => None,
         });
-        let err_diplay_arm = impls.iter().filter_map(|item| match *item {
+        let err_display_arm = impls.iter().filter_map(|item| match *item {
             Self::ErrorDisplayArm(ref el) => Some(el),
             _ => None,
         });
@@ -76,7 +76,7 @@ impl Implementation {
             proc_macro_attrs,
             err_variants,
             validity_checks,
-            err_diplay_arm,
+            err_display_arm,
         )
     }
 }
