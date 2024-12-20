@@ -15,14 +15,6 @@ pub(crate) enum Derive {
     Transparent(syn::Path),
 }
 
-impl Derive {
-    const fn trait_name(&self) -> &syn::Path {
-        match *self {
-            Self::Transparent(ref path) => path,
-        }
-    }
-}
-
 impl Parse for Derive {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let trait_path = syn::Path::parse(input)?;
@@ -53,9 +45,8 @@ impl gen::Gen for Derive {
         &self,
         _: &crate::NNNType,
     ) -> impl Iterator<Item = gen::Implementation> {
-        let trait_name = self.trait_name();
-        iter::once(gen::Implementation::Attribute(
-            parse_quote! { #[derive(#trait_name)] },
-        ))
+        iter::once(gen::Implementation::Attribute(match *self {
+            Self::Transparent(ref path) => parse_quote! { #[derive(#path)] },
+        }))
     }
 }
