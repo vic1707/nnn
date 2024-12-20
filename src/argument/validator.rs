@@ -100,45 +100,45 @@ impl Validator {
                 parse_quote! {{
                     #[inline]
                     #[must_use]
-                    fn check(value: &<#inner_type as IntoIterator>::Item) -> Result<(), #error_type> {
+                    fn check(value: <#inner_type as IntoIterator>::Item) -> Result<(), #error_type> {
                         #(#inner_branches)*
                         Ok(())
                     };
                     for (idx, el) in value.iter().enumerate() {
-                        check(el).map_err(|err| #error_type::Each(idx, Box::new(err)))?;
+                        check(*el).map_err(|err| #error_type::Each(idx, Box::new(err)))?;
                     }
                 }}
             },
             Self::MinLength(ref val) => {
-                parse_quote! {{ if value.len() < #val { return Err(#error_type::MinLength) } }}
+                parse_quote! {{ if !(value.len() > #val) { return Err(#error_type::MinLength) } }}
             },
             Self::MinLengthOrEq(ref val) => {
-                parse_quote! {{ if value.len() <= #val { return Err(#error_type::MinLengthOrEq) } }}
+                parse_quote! {{ if !(value.len() >= #val) { return Err(#error_type::MinLengthOrEq) } }}
             },
             Self::Length(ref val) => {
                 parse_quote! {{ if value.len() != #val { return Err(#error_type::Length) } }}
             },
             Self::MaxLength(ref val) => {
-                parse_quote! {{ if value.len() > #val { return Err(#error_type::MaxLength) } }}
+                parse_quote! {{ if !(value.len() < #val) { return Err(#error_type::MaxLength) } }}
             },
             Self::MaxLengthOrEq(ref val) => {
-                parse_quote! {{ if value.len() >= #val { return Err(#error_type::MaxLengthOrEq) } }}
+                parse_quote! {{ if !(value.len() <= #val) { return Err(#error_type::MaxLengthOrEq) } }}
             },
             // Numerics
             Self::Min(ref val) => {
-                parse_quote! {{ if value >= #val { return Err(#error_type::Min) } }}
+                parse_quote! {{ if !(value > #val) { return Err(#error_type::Min) } }}
             },
             Self::MinOrEq(ref val) => {
-                parse_quote! {{ if value > #val { return Err(#error_type::MinOrEq) } }}
+                parse_quote! {{ if !(value >= #val) { return Err(#error_type::MinOrEq) } }}
             },
             Self::Exactly(ref val) => {
                 parse_quote! {{ if value != #val { return Err(#error_type::Exactly) } }}
             },
             Self::Max(ref val) => {
-                parse_quote! {{ if value <= #val { return Err(#error_type::Max) } }}
+                parse_quote! {{ if !(value < #val) { return Err(#error_type::Max) } }}
             },
             Self::MaxOrEq(ref val) => {
-                parse_quote! {{ if value < #val { return Err(#error_type::MaxOrEq) } }}
+                parse_quote! {{ if !(value <= #val) { return Err(#error_type::MaxOrEq) } }}
             },
             // Float specifics
             Self::Finite => {
