@@ -48,6 +48,11 @@ impl Arguments {
                 .iter()
                 .flat_map(|nu| nu.gen_impl(new_type)),
         )
+        .chain(
+            self.validators
+                .iter()
+                .flat_map(|val| val.gen_impl(new_type)),
+        )
         .collect()
     }
 
@@ -60,6 +65,7 @@ impl Arguments {
             .chain(self.derives.iter().map(|der| der.gen_tests(new_type)))
             .chain(self.default.iter().map(|def| def.gen_tests(new_type)))
             .chain(self.new_unchecked.iter().map(|nu| nu.gen_tests(new_type)))
+            .chain(self.validators.iter().map(|val| val.gen_tests(new_type)))
             .flatten()
             .collect()
     }

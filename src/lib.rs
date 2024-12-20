@@ -41,8 +41,14 @@ fn expand(
 
     let tests = args.get_tests(&new_type);
     let impls = args.get_impls(&new_type);
-    let (impl_blocks, bare_impls, macro_attrs) =
-        gen::Implementation::separate_variants(&impls);
+    let (
+        impl_blocks,
+        bare_impls,
+        macro_attrs,
+        err_variants,
+        validity_checks,
+        err_diplay_arm,
+    ) = gen::Implementation::separate_variants(&impls);
 
     Ok(quote! {
         #[doc(hidden)]
@@ -53,7 +59,19 @@ fn expand(
             #new_type
 
             #[derive(Debug)]
-            pub enum #error_name {}
+            pub enum #error_name {
+                #(#err_variants),*
+            }
+
+            impl ::core::error::Error for #error_name {}
+
+            impl ::core::fmt::Display for #error_name {
+                fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    match *self {
+                        #(#err_diplay_arm),*
+                    }
+                }
+            }
 
             impl #impl_generics #type_name #ty_generics #where_clause {
                 #[inline]
@@ -65,6 +83,7 @@ fn expand(
                 #[inline]
                 #[must_use]
                 pub fn try_new(value: #inner_type) -> Result<Self, #error_name> {
+                    #(#validity_checks)*
                     Ok(Self(value))
                 }
 

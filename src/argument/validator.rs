@@ -11,7 +11,7 @@ use syn::{
 pub(crate) enum Validator {
     // Containers
     NotEmpty,
-    Each(Punctuated<Validator, Comma>),
+    Each(Punctuated<Self, Comma>),
     MinLength(syn::Lit),
     Length(syn::Lit),
     MaxLength(syn::Lit),
