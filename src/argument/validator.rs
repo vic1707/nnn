@@ -152,11 +152,20 @@ impl Validator {
             },
             // String specifics
             Self::Regex(ref regex) => {
-                let error_name = new_type.error_name();
-                let (match_type, match_value) = regex.decl();
+                let condition: syn::Block = match *regex {
+                    RegexInput::Path(ref path) => {
+                        parse_quote! {{ ! #path.is_match(&value) }}
+                    },
+                    RegexInput::StringLiteral(ref lit) => {
+                        let err = format!("Invalid Regex`{}`.", lit.value());
+                        parse_quote! {{
+                            static REGEX_TO_MATCH: ::std::sync::LazyLock<::regex::Regex> = ::std::sync::LazyLock::new(|| ::regex::Regex::new(&#lit).expect(#err));
+                            ! REGEX_TO_MATCH.is_match(&value)
+                        }}
+                    },
+                };
                 parse_quote! {{
-                    static REGEX_TO_MATCH: #match_type = #match_value;
-                    if ! REGEX_TO_MATCH.is_match(&value) { return Err(#error_name::Regex) }
+                    if #condition { return Err(#error_type::Regex) }
                 }}
             },
         }
@@ -270,9 +279,16 @@ impl Validator {
             },
             // String specifics
             Self::Regex(ref regex) => {
-                let regex_expression_access = regex.in_code_access_to_str();
+                let regex_expression_display = match *regex {
+                    RegexInput::StringLiteral(ref lit) => {
+                        quote::quote! { #lit }
+                    },
+                    RegexInput::Path(ref path) => {
+                        quote::quote! { #path.as_str() }
+                    },
+                };
                 parse_quote! {
-                    Self::Regex => write!(fmt, "[{}] Value should match {}.", stringify!(#type_name), #regex_expression_access)
+                    Self::Regex => write!(fmt, "[{}] Value should match `{}`.", stringify!(#type_name), #regex_expression_display)
                 }
             },
         }
