@@ -15,6 +15,8 @@ mod validators {
     mod min_or_eq;
     mod max;
     mod max_or_eq;
+    mod positive;
+    mod negative;
     // Float specifics
     mod finite;
     mod not_infinite;

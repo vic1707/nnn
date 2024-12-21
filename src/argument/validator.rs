@@ -27,6 +27,8 @@ pub(crate) enum Validator {
     MinOrEq(syn::Expr),
     Max(syn::Expr),
     MaxOrEq(syn::Expr),
+    Positive,
+    Negative,
     // Float specifics
     Finite,
     NotInfinite,
@@ -77,6 +79,8 @@ impl Validator {
             Self::Exactly(_) => parse_quote! { Exactly },
             Self::Max(_) => parse_quote! { Max },
             Self::MaxOrEq(_) => parse_quote! { MaxOrEq },
+            Self::Positive => parse_quote! { Positive },
+            Self::Negative => parse_quote! { Negative },
             // Float specifics
             Self::Finite => parse_quote! { Finite },
             Self::NotInfinite => parse_quote! { NotInfinite },
@@ -139,6 +143,18 @@ impl Validator {
             },
             Self::MaxOrEq(ref val) => {
                 parse_quote! {{ if !(value <= #val) { return Err(#error_type::MaxOrEq) } }}
+            },
+            Self::Positive => {
+                parse_quote! {{
+                    #[allow(deprecated, reason = "Allows transparency between signed numbers and floats.")]
+                    if ! value.is_positive() { return Err(#error_type::Positive) }
+                }}
+            },
+            Self::Negative => {
+                parse_quote! {{
+                    #[allow(deprecated, reason = "Allows transparency between signed numbers and floats.")]
+                    if ! value.is_negative() { return Err(#error_type::Negative) }
+                }}
             },
             // Float specifics
             Self::Finite => {
@@ -261,6 +277,14 @@ impl Validator {
                 );
                 parse_quote! { Self::MaxOrEq => write!(fmt, #msg) }
             },
+            Self::Positive => {
+                let msg = format!("[{type_name}] Value should be positive.");
+                parse_quote! { Self::Positive => write!(fmt, #msg) }
+            },
+            Self::Negative => {
+                let msg = format!("[{type_name}] Value should be negative.");
+                parse_quote! { Self::Negative => write!(fmt, #msg) }
+            },
             // Float specifics
             Self::Finite => {
                 let msg = format!(
@@ -313,6 +337,8 @@ impl Parse for Validator {
             "exactly" => Self::Exactly(input.parse_equal()?),
             "max" => Self::Max(input.parse_equal()?),
             "max_or_eq" => Self::MaxOrEq(input.parse_equal()?),
+            "positive" => Self::Positive,
+            "negative" => Self::Negative,
             // Float specifics
             "finite" => Self::Finite,
             "not_infinite" => Self::NotInfinite,
