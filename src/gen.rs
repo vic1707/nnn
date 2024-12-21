@@ -32,7 +32,6 @@ pub(crate) enum Implementation {
 }
 
 impl Implementation {
-    #[expect(clippy::type_complexity, reason = "LGTM")]
     #[expect(clippy::wildcard_enum_match_arm, reason = "Specific extractions.")]
     pub(crate) fn separate_variants(
         impls: &[Self],
@@ -40,9 +39,9 @@ impl Implementation {
         impl Iterator<Item = &syn::ItemImpl>,
         impl Iterator<Item = &ImplItem>,
         impl Iterator<Item = &syn::Attribute>,
-        impl Iterator<Item = &Punctuated<syn::Variant, Comma>>,
+        impl Iterator<Item = &syn::Variant>,
         impl Iterator<Item = &syn::Block>,
-        impl Iterator<Item = &Punctuated<syn::Arm, Comma>>,
+        impl Iterator<Item = &syn::Arm>,
     ) {
         let impl_blocks = impls.iter().filter_map(|item| match *item {
             Self::ItemImpl(ref el) => Some(el),
@@ -60,18 +59,24 @@ impl Implementation {
             })
             .flatten();
 
-        let err_variants = impls.iter().filter_map(|item| match *item {
-            Self::ErrorVariant(ref el) => Some(el),
-            _ => None,
-        });
+        let err_variants = impls
+            .iter()
+            .filter_map(|item| match *item {
+                Self::ErrorVariant(ref el) => Some(el),
+                _ => None,
+            })
+            .flatten();
         let validity_checks = impls.iter().filter_map(|item| match *item {
             Self::ValidityCheck(ref el) => Some(el),
             _ => None,
         });
-        let err_display_arm = impls.iter().filter_map(|item| match *item {
-            Self::ErrorDisplayArm(ref el) => Some(el),
-            _ => None,
-        });
+        let err_display_arm = impls
+            .iter()
+            .filter_map(|item| match *item {
+                Self::ErrorDisplayArm(ref el) => Some(el),
+                _ => None,
+            })
+            .flatten();
 
         (
             impl_blocks,
