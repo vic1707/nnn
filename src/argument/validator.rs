@@ -17,17 +17,16 @@ pub(crate) enum Validator {
     // Containers
     NotEmpty,
     Each(Punctuated<Self, Comma>),
-    MinLength(syn::Lit),
-    MinLengthOrEq(syn::Lit),
-    Length(syn::Lit),
-    MaxLength(syn::Lit),
-    MaxLengthOrEq(syn::Lit),
+    MinLength(syn::Expr),
+    MinLengthOrEq(syn::Expr),
+    Length(syn::Expr),
+    MaxLength(syn::Expr),
+    MaxLengthOrEq(syn::Expr),
     // Numerics
-    Min(syn::Lit),
-    MinOrEq(syn::Lit),
-    Exactly(syn::Lit),
-    Max(syn::Lit),
-    MaxOrEq(syn::Lit),
+    Min(syn::Expr),
+    MinOrEq(syn::Expr),
+    Max(syn::Expr),
+    MaxOrEq(syn::Expr),
     // Float specifics
     Finite,
     NotInfinite,
@@ -35,6 +34,7 @@ pub(crate) enum Validator {
     // String specifics
     Regex(RegexInput),
     // Commons
+    Exactly(syn::Expr),
     // TODO: also takes in an error type
     // With
 }
@@ -302,27 +302,23 @@ impl Parse for Validator {
             // Containers
             "not_empty" => Self::NotEmpty,
             "each" => Self::Each(input.parse_parenthesized::<Self>()?),
-            "min_length" => Self::MinLength(input.parse_equal::<syn::Lit>()?),
-            "min_length_or_eq" => {
-                Self::MinLengthOrEq(input.parse_equal::<syn::Lit>()?)
-            },
-            "length" => Self::Length(input.parse_equal::<syn::Lit>()?),
-            "max_length" => Self::MaxLength(input.parse_equal::<syn::Lit>()?),
-            "max_length_or_eq" => {
-                Self::MaxLengthOrEq(input.parse_equal::<syn::Lit>()?)
-            },
+            "min_length" => Self::MinLength(input.parse_equal()?),
+            "min_length_or_eq" => Self::MinLengthOrEq(input.parse_equal()?),
+            "length" => Self::Length(input.parse_equal()?),
+            "max_length" => Self::MaxLength(input.parse_equal()?),
+            "max_length_or_eq" => Self::MaxLengthOrEq(input.parse_equal()?),
             // Numerics
-            "min" => Self::Min(input.parse_equal::<syn::Lit>()?),
-            "min_or_eq" => Self::MinOrEq(input.parse_equal::<syn::Lit>()?),
-            "exactly" => Self::Exactly(input.parse_equal::<syn::Lit>()?),
-            "max" => Self::Max(input.parse_equal::<syn::Lit>()?),
-            "max_or_eq" => Self::MaxOrEq(input.parse_equal::<syn::Lit>()?),
+            "min" => Self::Min(input.parse_equal()?),
+            "min_or_eq" => Self::MinOrEq(input.parse_equal()?),
+            "exactly" => Self::Exactly(input.parse_equal()?),
+            "max" => Self::Max(input.parse_equal()?),
+            "max_or_eq" => Self::MaxOrEq(input.parse_equal()?),
             // Float specifics
             "finite" => Self::Finite,
             "not_infinite" => Self::NotInfinite,
             "not_nan" => Self::NotNAN,
             // String specifics
-            "regex" => Self::Regex(input.parse_equal::<RegexInput>()?),
+            "regex" => Self::Regex(input.parse_equal()?),
             _ => {
                 return Err(syn::Error::new_spanned(name, "Unknown validator."))
             },
