@@ -7,7 +7,7 @@ mod utils;
 use argument::{Argument, Arguments};
 use nnn_type::NNNType;
 /* Dependencies imports */
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::{parse::Parser as _, punctuated::Punctuated};
 
 #[proc_macro_attribute]
@@ -50,9 +50,11 @@ fn expand(
         err_display_arm,
     ) = gen::Implementation::separate_variants(&impls);
 
+    let mod_name = format_ident!("__private_{}", new_type.type_name());
     Ok(quote! {
         #[doc(hidden)]
-        mod __private {
+        #[allow(non_snake_case, reason = "Includes NNNType name which is probably CamelCase.")]
+        mod #mod_name {
             use super::*;
 
             #(#macro_attrs)*
@@ -101,8 +103,8 @@ fn expand(
         }
 
         #[allow(clippy::pub_use, reason = "_")]
-        #original_visibility use __private::#type_name;
+        #original_visibility use #mod_name::#type_name;
         #[allow(clippy::pub_use, reason = "_")]
-        #original_visibility use __private::#error_name;
+        #original_visibility use #mod_name::#error_name;
     })
 }
