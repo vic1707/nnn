@@ -1,4 +1,3 @@
-#![allow(clippy::float_cmp, reason = "_")]
 /* Crate imports */
 use nnn::nnn;
 /* Dependencies */

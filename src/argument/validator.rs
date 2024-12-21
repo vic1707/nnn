@@ -136,7 +136,10 @@ impl Validator {
                 parse_quote! {{ if !(value >= #val) { return Err(#error_type::MinOrEq) } }}
             },
             Self::Exactly(ref val) => {
-                parse_quote! {{ if value != #val { return Err(#error_type::Exactly) } }}
+                parse_quote! {{
+                    #[allow(clippy::float_cmp, reason = "Allows transparency between signed numbers and floats.")]
+                    if value != #val { return Err(#error_type::Exactly) }
+                }}
             },
             Self::Max(ref val) => {
                 parse_quote! {{ if !(value < #val) { return Err(#error_type::Max) } }}

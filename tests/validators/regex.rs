@@ -1,4 +1,3 @@
-#![allow(clippy::float_cmp, reason = "_")]
 /* Built-in imports */
 use std::sync::LazyLock;
 /* Crate imports */
@@ -26,7 +25,7 @@ fn invalid_regex_literal_str(#[case] input: &str) {
 }
 
 // Regex with a variable
-#[expect(clippy::expect_used, reason = "_")]
+#[expect(clippy::expect_used, reason = "Test, so this is acceptable.")]
 static SSN_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::try_from(r"^\d{3}-\d{2}-\d{4}$").expect("Invalid test regex")
 });
