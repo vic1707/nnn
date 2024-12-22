@@ -1,0 +1,5 @@
+error: To derive the `Default` trait, use the `default` or `default = ..` argument.
+ --> tests/ui/fail/derive_default.rs:3:14
+  |
+3 | #[nnn(derive(Default))]
+  |              ^^^^^^^

@@ -1,0 +1,5 @@
+error: Deriving `From` results in a possible bypass of the validators and sanitizers and is therefore forbidden.
+ --> tests/ui/fail/derive_from.rs:3:14
+  |
+3 | #[nnn(derive(From))]
+  |              ^^^^
