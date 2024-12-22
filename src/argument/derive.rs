@@ -27,6 +27,9 @@ impl Parse for Derive {
             .to_string()
             .as_str()
         {
+            // Special cases
+            "Deserialize" => Ok(Self::Deserialize(trait_path)),
+            // Forbidden derives
             derive_more @ (
                 "Add" | "AddAssign" | "Constructor" | "Div" | "DivAssign" | "From" | "FromStr" | "Mul" | "MulAssign" | "Neg" | "Rem" | "RemAssign" | "Shl" | "ShlAssign" | "Shr" | "ShrAssign" | "Sub" | "SubAssign" | "Sum"
             ) => Err(syn::Error::new_spanned(
@@ -37,9 +40,6 @@ impl Parse for Derive {
                 trait_path,
                 "To derive the `Default` trait, use the `default` or `default = ..` argument."
             )),
-
-            //
-            "Deserialize" => Ok(Self::Deserialize(trait_path)),
             _ => Ok(Self::Transparent(trait_path)),
         }
     }
