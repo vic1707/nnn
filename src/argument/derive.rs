@@ -27,15 +27,18 @@ impl Parse for Derive {
             .to_string()
             .as_str()
         {
-            // Available via crates like `derive_more`.
-            "From" => Err(syn::Error::new_spanned(
+            derive_more @ (
+                "Add" | "AddAssign" | "Constructor" | "Div" | "DivAssign" | "From" | "FromStr" | "Mul" | "MulAssign" | "Neg" | "Rem" | "RemAssign" | "Shl" | "ShlAssign" | "Shr" | "ShrAssign" | "Sub" | "SubAssign" | "Sum"
+            ) => Err(syn::Error::new_spanned(
                 trait_path,
-                "Deriving `From` results in a possible bypass of the validators and sanitizers and is therefore forbidden."
+                format!("Deriving `{derive_more}` results in a possible bypass of the validators and sanitizers and is therefore forbidden.")
             )),
             "Default" => Err(syn::Error::new_spanned(
                 trait_path,
                 "To derive the `Default` trait, use the `default` or `default = ..` argument."
             )),
+
+            //
             "Deserialize" => Ok(Self::Deserialize(trait_path)),
             _ => Ok(Self::Transparent(trait_path)),
         }
