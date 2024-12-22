@@ -92,7 +92,6 @@ impl Validator {
 
     pub(crate) fn check(&self, new_type: &crate::NNNType) -> syn::Block {
         let error_type = new_type.error_name();
-        let inner_type = new_type.inner_type();
         match *self {
             // Containers
             Self::NotEmpty => {
@@ -102,15 +101,17 @@ impl Validator {
                 let inner_branches =
                     checks.iter().map(|val| val.check(new_type));
                 parse_quote! {{
-                    #[inline]
-                    #[must_use]
-                    fn check(value: <#inner_type as IntoIterator>::Item) -> Result<(), #error_type> {
-                        #(#inner_branches)*
-                        Ok(())
-                    };
-                    for (idx, el) in value.iter().enumerate() {
-                        check(*el).map_err(|err| #error_type::Each(idx, Box::new(err)))?;
-                    }
+                    // TODO: is .cloned() really the solution ?
+                    value.iter().cloned().enumerate().try_for_each(
+                        |(idx, value)| {
+                            // Used to avoid short circuits from `return` statements in branches
+                            let check = || {
+                                #(#inner_branches)*
+                                Ok(())
+                            };
+                            check().map_err(|err| #error_type::Each(idx, Box::new(err)))
+                        }
+                    )?
                 }}
             },
             Self::MinLength(ref val) => {
@@ -195,8 +196,8 @@ impl Validator {
         new_type: &crate::NNNType,
     ) -> Vec<syn::Arm> {
         let type_name = new_type.type_name();
-        // Containers
         match *self {
+            // Containers
             Self::NotEmpty => {
                 let msg = format!("[{type_name}] Value should not empty.");
                 parse_quote! { Self::NotEmpty => write!(fmt, #msg), }
@@ -205,7 +206,7 @@ impl Validator {
                 let steps_fmt =
                     steps.iter().flat_map(|step| step.display_arm(new_type));
                 parse_quote! {
-                    Self::Each(ref _0, ref _1) => write!(fmt, "[{}] Error: '{_1}', at index {_0}.", stringify!(#type_name)),
+                    Self::Each(ref idx, ref inner_err) => write!(fmt, "[{}] Error: '{inner_err}', at index {idx}.", stringify!(#type_name)),
                     #(#steps_fmt)*
                 }
             },

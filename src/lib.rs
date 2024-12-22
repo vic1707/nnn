@@ -3,6 +3,8 @@ mod argument;
 mod gen;
 mod nnn_type;
 mod utils;
+/* Built-in imports */
+use std::collections::HashSet;
 /* Crate imports */
 use argument::{Argument, Arguments};
 use nnn_type::NNNType;
@@ -50,6 +52,8 @@ fn expand(
         err_display_arm,
     ) = gen::Implementation::separate_variants(&impls);
 
+    let dedup_err_variants = err_variants.collect::<HashSet<_>>().into_iter();
+
     let mod_name = format_ident!("__private_{}", new_type.type_name());
     Ok(quote! {
         #[doc(hidden)]
@@ -62,7 +66,7 @@ fn expand(
 
             #[derive(Debug)]
             pub enum #error_name {
-                #(#err_variants),*
+                #(#dedup_err_variants),*
             }
 
             impl ::core::error::Error for #error_name {}
