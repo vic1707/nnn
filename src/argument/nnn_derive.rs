@@ -16,6 +16,8 @@ use syn::{
 pub(crate) enum NNNDerive {
     Into,
     TryFrom,
+    Borrow,
+    BorrowMut,
 }
 
 impl Parse for NNNDerive {
@@ -36,6 +38,8 @@ impl Parse for NNNDerive {
         {
             "Into" => Ok(Self::Into),
             "TryFrom" => Ok(Self::TryFrom),
+            "Borrow" => Ok(Self::Borrow),
+            "BorrowMut" => Ok(Self::BorrowMut),
             _ => Err(syn::Error::new_spanned(
                 trait_path,
                 "Unknown `nnn_derive`.",
@@ -56,10 +60,26 @@ impl gen::Gen for NNNDerive {
             nnn_type.generics().split_for_impl();
 
         iter::once(gen::Implementation::ItemImpl(match *self {
+            // TODO: maybe better to do From<new_type> for inner_type ?
             Self::Into => parse_quote! {
                 impl #impl_generics ::core::convert::Into<#inner_type> for #type_name #ty_generics #where_clause {
                     fn into(self) -> #inner_type {
                         self.0
+                    }
+                }
+            },
+            // TODO: String can do str, Vec can do slices?
+            Self::Borrow => parse_quote! {
+                impl #impl_generics ::core::borrow::Borrow<#inner_type> for #type_name #ty_generics #where_clause {
+                    fn borrow(&self) -> &#inner_type {
+                        &self.0
+                    }
+                }
+            },
+            Self::BorrowMut => parse_quote! {
+                impl #impl_generics ::core::borrow::BorrowMut<#inner_type> for #type_name #ty_generics #where_clause {
+                    fn borrow_mut(&mut self) -> &mut #inner_type {
+                        &mut self.0
                     }
                 }
             },
