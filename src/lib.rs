@@ -70,7 +70,7 @@ fn expand(
             impl ::core::fmt::Display for #error_name {
                 fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                     match *self {
-                        #(#err_display_arm),*
+                        #(#err_display_arm)*
                     }
                 }
             }

@@ -193,20 +193,20 @@ impl Validator {
     pub(crate) fn display_arm(
         &self,
         new_type: &crate::NNNType,
-    ) -> Punctuated<syn::Arm, Comma> {
+    ) -> Vec<syn::Arm> {
         let type_name = new_type.type_name();
         // Containers
         match *self {
             Self::NotEmpty => {
                 let msg = format!("[{type_name}] Value should not empty.");
-                parse_quote! { Self::NotEmpty => write!(fmt, #msg) }
+                parse_quote! { Self::NotEmpty => write!(fmt, #msg), }
             },
             Self::Each(ref steps) => {
                 let steps_fmt =
-                    steps.iter().map(|step| step.display_arm(new_type));
+                    steps.iter().flat_map(|step| step.display_arm(new_type));
                 parse_quote! {
                     Self::Each(ref _0, ref _1) => write!(fmt, "[{}] Error: '{_1}', at index {_0}.", stringify!(#type_name)),
-                    #(#steps_fmt),*
+                    #(#steps_fmt)*
                 }
             },
             Self::MinLength(ref val) => {
@@ -214,35 +214,35 @@ impl Validator {
                     "[{type_name}] Length should be greater than {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MinLength => write!(fmt, #msg) }
+                parse_quote! { Self::MinLength => write!(fmt, #msg), }
             },
             Self::MinLengthOrEq(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be greater or equal to {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MinLengthOrEq => write!(fmt, #msg) }
+                parse_quote! { Self::MinLengthOrEq => write!(fmt, #msg), }
             },
             Self::Length(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be exactly {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::Length => write!(fmt, #msg) }
+                parse_quote! { Self::Length => write!(fmt, #msg), }
             },
             Self::MaxLength(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be lesser than {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MaxLength => write!(fmt, #msg) }
+                parse_quote! { Self::MaxLength => write!(fmt, #msg), }
             },
             Self::MaxLengthOrEq(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be lesser or equal to {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MaxLengthOrEq => write!(fmt, #msg) }
+                parse_quote! { Self::MaxLengthOrEq => write!(fmt, #msg), }
             },
             // Numerics
             Self::Min(ref val) => {
@@ -250,59 +250,59 @@ impl Validator {
                     "[{type_name}] Value should be greater than {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::Min => write!(fmt, #msg) }
+                parse_quote! { Self::Min => write!(fmt, #msg), }
             },
             Self::MinOrEq(ref val) => {
                 let msg = format!(
                     "[{type_name}] Value should be greater or equal to {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MinOrEq => write!(fmt, #msg) }
+                parse_quote! { Self::MinOrEq => write!(fmt, #msg), }
             },
             Self::Exactly(ref val) => {
                 let msg = format!(
                     "[{type_name}] Value should be exactly {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::Exactly => write!(fmt, #msg) }
+                parse_quote! { Self::Exactly => write!(fmt, #msg), }
             },
             Self::Max(ref val) => {
                 let msg = format!(
                     "[{type_name}] Value should be lesser than {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::Max => write!(fmt, #msg) }
+                parse_quote! { Self::Max => write!(fmt, #msg), }
             },
             Self::MaxOrEq(ref val) => {
                 let msg = format!(
                     "[{type_name}] Value should be lesser or equal to {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MaxOrEq => write!(fmt, #msg) }
+                parse_quote! { Self::MaxOrEq => write!(fmt, #msg), }
             },
             Self::Positive => {
                 let msg = format!("[{type_name}] Value should be positive.");
-                parse_quote! { Self::Positive => write!(fmt, #msg) }
+                parse_quote! { Self::Positive => write!(fmt, #msg), }
             },
             Self::Negative => {
                 let msg = format!("[{type_name}] Value should be negative.");
-                parse_quote! { Self::Negative => write!(fmt, #msg) }
+                parse_quote! { Self::Negative => write!(fmt, #msg), }
             },
             // Float specifics
             Self::Finite => {
                 let msg = format!(
                     "[{type_name}] Value should not be NAN nor infinite."
                 );
-                parse_quote! { Self::Finite => write!(fmt, #msg) }
+                parse_quote! { Self::Finite => write!(fmt, #msg), }
             },
             Self::NotInfinite => {
                 let msg =
                     format!("[{type_name}] Value should not be infinite.");
-                parse_quote! { Self::NotInfinite => write!(fmt, #msg) }
+                parse_quote! { Self::NotInfinite => write!(fmt, #msg), }
             },
             Self::NotNAN => {
                 let msg = format!("[{type_name}] Value should not be NAN.");
-                parse_quote! { Self::NotNAN => write!(fmt, #msg) }
+                parse_quote! { Self::NotNAN => write!(fmt, #msg), }
             },
             // String specifics
             Self::Regex(ref regex) => {
@@ -315,7 +315,7 @@ impl Validator {
                     },
                 };
                 parse_quote! {
-                    Self::Regex => write!(fmt, "[{}] Value should match `{}`.", stringify!(#type_name), #regex_expression_display)
+                    Self::Regex => write!(fmt, "[{}] Value should match `{}`.", stringify!(#type_name), #regex_expression_display),
                 }
             },
         }

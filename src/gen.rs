@@ -28,7 +28,7 @@ pub(crate) enum Implementation {
 
     ErrorVariant(Punctuated<syn::Variant, Comma>),
     ValidityCheck(syn::Block),
-    ErrorDisplayArm(Punctuated<syn::Arm, Comma>),
+    ErrorDisplayArm(Vec<syn::Arm>),
 }
 
 impl Implementation {
