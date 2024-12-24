@@ -4,11 +4,13 @@ mod default;
 mod derive;
 mod new_unchecked;
 mod nnn_derive;
+mod sanitizer;
 mod validator;
 /* Crate imports */
 use self::{
     associated_const::AssociatedConst, default::Default, derive::Derive,
-    new_unchecked::NewUnchecked, nnn_derive::NNNDerive, validator::Validator,
+    new_unchecked::NewUnchecked, nnn_derive::NNNDerive, sanitizer::Sanitizer,
+    validator::Validator,
 };
 use crate::{
     gen::{self, Gen as _},
@@ -28,6 +30,7 @@ pub(crate) struct Arguments {
     derives: Vec<Derive>,
     default: Option<Default>,
     new_unchecked: Option<NewUnchecked>,
+    sanitizers: Vec<Sanitizer>,
     validators: Vec<Validator>,
 }
 
@@ -49,6 +52,11 @@ impl Arguments {
                 .flat_map(|nu| nu.gen_impl(new_type)),
         )
         .chain(
+            self.sanitizers
+                .iter()
+                .flat_map(|san| san.gen_impl(new_type)),
+        )
+        .chain(
             self.validators
                 .iter()
                 .flat_map(|val| val.gen_impl(new_type)),
@@ -65,6 +73,7 @@ impl Arguments {
             .chain(self.derives.iter().map(|der| der.gen_tests(new_type)))
             .chain(self.default.iter().map(|def| def.gen_tests(new_type)))
             .chain(self.new_unchecked.iter().map(|nu| nu.gen_tests(new_type)))
+            .chain(self.sanitizers.iter().map(|san| san.gen_tests(new_type)))
             .chain(self.validators.iter().map(|val| val.gen_tests(new_type)))
             .flatten()
             .collect()
@@ -83,6 +92,9 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
                 Argument::Derive(derives) => args.derives.extend(derives),
                 Argument::Default(default) => args.default = Some(default),
                 Argument::NewUnchecked(nu) => args.new_unchecked = Some(nu),
+                Argument::Sanitizers(sanitizers) => {
+                    args.sanitizers.extend(sanitizers);
+                },
                 Argument::Validators(validators) => {
                     args.validators.extend(validators);
                 },
@@ -99,6 +111,7 @@ pub(crate) enum Argument {
     Derive(Punctuated<Derive, Comma>),
     Default(Default),
     NewUnchecked(NewUnchecked),
+    Sanitizers(Punctuated<Sanitizer, Comma>),
     Validators(Punctuated<Validator, Comma>),
 }
 
@@ -120,6 +133,9 @@ impl Parse for Argument {
                 })
             },
             "new_unchecked" => Self::NewUnchecked(NewUnchecked),
+            "sanitizers" => {
+                Self::Sanitizers(input.parse_parenthesized::<Sanitizer>()?)
+            },
             "validators" => {
                 Self::Validators(input.parse_parenthesized::<Validator>()?)
             },

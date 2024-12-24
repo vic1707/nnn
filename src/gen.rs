@@ -29,6 +29,8 @@ pub(crate) enum Implementation {
     ErrorVariant(Punctuated<syn::Variant, Comma>),
     ValidityCheck(syn::Block),
     ErrorDisplayArm(Vec<syn::Arm>),
+
+    SanitizationStep(syn::Block),
 }
 
 impl Implementation {
@@ -42,6 +44,7 @@ impl Implementation {
         impl Iterator<Item = &syn::Variant>,
         impl Iterator<Item = &syn::Block>,
         impl Iterator<Item = &syn::Arm>,
+        impl Iterator<Item = &syn::Block>,
     ) {
         let impl_blocks = impls.iter().filter_map(|item| match *item {
             Self::ItemImpl(ref el) => Some(el),
@@ -78,6 +81,11 @@ impl Implementation {
             })
             .flatten();
 
+        let sanitization_steps = impls.iter().filter_map(|item| match *item {
+            Self::SanitizationStep(ref el) => Some(el),
+            _ => None,
+        });
+
         (
             impl_blocks,
             impl_items,
@@ -85,6 +93,7 @@ impl Implementation {
             err_variants,
             validity_checks,
             err_display_arm,
+            sanitization_steps,
         )
     }
 }

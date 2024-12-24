@@ -50,6 +50,7 @@ fn expand(
         err_variants,
         validity_checks,
         err_display_arm,
+        sanitization_steps,
     ) = gen::Implementation::separate_variants(&impls);
 
     let dedup_err_variants = err_variants.collect::<HashSet<_>>().into_iter();
@@ -86,11 +87,19 @@ fn expand(
                 pub fn into_inner(self) -> #inner_type {
                     self.0
                 }
+
                 #[inline]
                 #[must_use]
-                pub fn try_new(value: #inner_type) -> Result<Self, #error_name> {
+                pub fn try_new(mut value: #inner_type) -> Result<Self, #error_name> {
+                    value = Self::sanitize(value);
                     #(#validity_checks)*
                     Ok(Self(value))
+                }
+
+                #[inline]
+                fn sanitize(mut value: #inner_type) -> #inner_type {
+                    #(#sanitization_steps)*
+                    value
                 }
 
                 #(#bare_impls)*

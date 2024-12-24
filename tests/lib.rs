@@ -31,6 +31,18 @@ mod derives {
     mod serde;
 }
 
+#[rustfmt::skip] // wants to reorder modules
+mod sanitizers {
+    // Containers
+    mod each;
+    mod sort;
+    mod dedup;
+    // Strings
+    mod trim;
+    mod lowercase;
+    mod uppercase;
+}
+
 #[cfg(test)]
 mod ui {
     #[test]
