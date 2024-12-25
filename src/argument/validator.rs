@@ -57,6 +57,15 @@ impl gen::Gen for Validator {
 
 #[expect(clippy::too_many_lines, reason = "Lots of validators.")]
 impl Validator {
+    pub(crate) fn has_finite(&self) -> bool {
+        #[expect(clippy::wildcard_enum_match_arm, reason = "_")]
+        match *self {
+            Self::Each(ref steps) => steps.iter().any(Self::has_finite),
+            Self::Finite => true,
+            _ => false,
+        }
+    }
+
     pub(crate) fn variant(&self) -> Punctuated<syn::Variant, Comma> {
         match *self {
             // Containers

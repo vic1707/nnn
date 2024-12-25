@@ -2,6 +2,7 @@
 use core::iter;
 /* Crate imports */
 use crate::gen;
+use super::Validator;
 /* Dependencies */
 use quote::ToTokens as _;
 use syn::{
@@ -11,6 +12,7 @@ use syn::{
 
 #[derive(Debug)]
 pub(crate) enum Derive {
+    Eq(syn::Path),
     Deserialize(syn::Path),
     /// A derive that will be passed down transparently.
     Transparent(syn::Path),
@@ -28,6 +30,7 @@ impl Parse for Derive {
             .as_str()
         {
             // Special cases
+            "Eq" => Ok(Self::Eq(trait_path)),
             "Deserialize" => Ok(Self::Deserialize(trait_path)),
             // Forbidden derives
             derive_more @ (
@@ -50,16 +53,32 @@ impl gen::Gen for Derive {
         &self,
         new_type: &crate::NNNType,
     ) -> impl Iterator<Item = gen::Implementation> {
-        iter::once(gen::Implementation::Attribute(match *self {
+        iter::once(match *self {
+            Self::Eq(ref path) => {
+                if new_type.args().validators.iter().any(Validator::has_finite) {
+                    let type_name = new_type.type_name();
+                    let (impl_generics, ty_generics, where_clause) =
+                        new_type.generics().split_for_impl();
+                    gen::Implementation::ItemImpl(parse_quote! {
+                        impl #impl_generics #path for #type_name #ty_generics #where_clause {}
+                    })
+                } else {
+                    gen::Implementation::Attribute(
+                        parse_quote! { #[derive(#path)] },
+                    )
+                }
+            },
             Self::Deserialize(ref path) => {
                 let inner_type =
                     new_type.inner_type().to_token_stream().to_string();
-                parse_quote! {
+                gen::Implementation::Attribute(parse_quote! {
                     #[derive(#path)]
                     #[serde(try_from = #inner_type)]
-                }
+                })
             },
-            Self::Transparent(ref path) => parse_quote! { #[derive(#path)] },
-        }))
+            Self::Transparent(ref path) => gen::Implementation::Attribute(
+                parse_quote! { #[derive(#path)] },
+            ),
+        })
     }
 }
