@@ -15,6 +15,7 @@ use syn::{
 /// Providing them so users aren't required to install other crates for trivial derives.
 pub(crate) enum NNNDerive {
     Into,
+    From,
     TryFrom,
     Borrow,
     BorrowMut,
@@ -37,6 +38,7 @@ impl Parse for NNNDerive {
             .as_str()
         {
             "Into" => Ok(Self::Into),
+            "From" => Ok(Self::From),
             "TryFrom" => Ok(Self::TryFrom),
             "Borrow" => Ok(Self::Borrow),
             "BorrowMut" => Ok(Self::BorrowMut),
@@ -60,11 +62,17 @@ impl gen::Gen for NNNDerive {
             nnn_type.generics().split_for_impl();
 
         iter::once(gen::Implementation::ItemImpl(match *self {
-            // TODO: maybe better to do From<new_type> for inner_type ?
             Self::Into => parse_quote! {
                 impl #impl_generics ::core::convert::Into<#inner_type> for #type_name #ty_generics #where_clause {
                     fn into(self) -> #inner_type {
                         self.0
+                    }
+                }
+            },
+            Self::From => parse_quote! {
+                impl #impl_generics ::core::convert::From<#type_name #ty_generics> for #inner_type #where_clause {
+                    fn from(value: #type_name #ty_generics) -> #inner_type {
+                        value.0
                     }
                 }
             },
