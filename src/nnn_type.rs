@@ -56,7 +56,9 @@ impl quote::ToTokens for NNNType {
 impl TryFrom<(syn::DeriveInput, Arguments)> for NNNType {
     type Error = syn::Error;
 
-    fn try_from((input, arguments): (syn::DeriveInput, Arguments)) -> Result<Self, Self::Error> {
+    fn try_from(
+        (input, arguments): (syn::DeriveInput, Arguments),
+    ) -> Result<Self, Self::Error> {
         if let Some(attr) = input.attrs.first() {
             return Err(syn::Error::new_spanned(
                 attr,

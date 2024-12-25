@@ -1,8 +1,8 @@
 /* Built-in imports */
 use core::iter;
 /* Crate imports */
-use crate::gen;
 use super::Validator;
+use crate::gen;
 /* Dependencies */
 use quote::ToTokens as _;
 use syn::{
@@ -55,7 +55,8 @@ impl gen::Gen for Derive {
     ) -> impl Iterator<Item = gen::Implementation> {
         iter::once(match *self {
             Self::Eq(ref path) => {
-                if new_type.args().validators.iter().any(Validator::has_finite) {
+                if new_type.args().validators.iter().any(Validator::has_finite)
+                {
                     let type_name = new_type.type_name();
                     let (impl_generics, ty_generics, where_clause) =
                         new_type.generics().split_for_impl();
