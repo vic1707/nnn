@@ -116,8 +116,6 @@ fn expand(
         }
 
         #[allow(clippy::pub_use, reason = "pub use can happen if struct is meant to be public.")]
-        #original_visibility use #mod_name::#type_name;
-        #[allow(clippy::pub_use, reason = "pub use can happen if struct is meant to be public.")]
-        #original_visibility use #mod_name::#error_name;
+        #original_visibility use #mod_name::{#type_name, #error_name};
     })
 }
