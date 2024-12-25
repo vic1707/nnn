@@ -92,13 +92,13 @@ fn expand(
                 #[must_use]
                 pub fn try_new(mut value: #inner_type) -> Result<Self, #error_name> {
                     value = Self::sanitize(value);
-                    #(#validity_checks)*
+                    #(#validity_checks;)*
                     Ok(Self(value))
                 }
 
                 #[inline]
                 fn sanitize(mut value: #inner_type) -> #inner_type {
-                    #(#sanitization_steps)*
+                    #(#sanitization_steps;)*
                     value
                 }
 

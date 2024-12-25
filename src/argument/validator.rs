@@ -115,7 +115,7 @@ impl Validator {
                         |(idx, value)| {
                             // Used to avoid short circuits from `return` statements in branches
                             let check = || {
-                                #(#inner_branches)*
+                                #(#inner_branches;)*
                                 Ok(())
                             };
                             check().map_err(|err| #error_type::Each(idx, Box::new(err)))

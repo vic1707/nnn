@@ -33,7 +33,7 @@ impl Sanitizer {
                 let inner_steps = steps.iter().map(Self::step);
                 parse_quote! {{
                     value = value.into_iter().map(|mut value| {
-                        #(#inner_steps)*
+                        #(#inner_steps;)*
                         value
                     }).collect();
                 }}
