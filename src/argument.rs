@@ -20,6 +20,7 @@ use crate::{
 /* Dependencies */
 use syn::{
     parse::{Parse, ParseStream},
+    parse_quote,
     punctuated::Punctuated,
     token::Comma,
 };
@@ -34,6 +35,7 @@ pub(crate) struct Arguments {
     sanitizers: Vec<Sanitizer>,
     validators: Vec<Validator>,
     cfgs: Vec<Cfg>,
+    transparents: Vec<syn::Meta>,
 }
 
 impl Arguments {
@@ -63,6 +65,12 @@ impl Arguments {
             self.validators
                 .iter()
                 .flat_map(|val| val.gen_impl(new_type)),
+        )
+        .chain(
+            self.transparents
+                .iter()
+                .map(|meta| parse_quote! { #[#meta] })
+                .map(|attr| gen::Implementation::Attribute(vec![attr])),
         )
         .collect()
     }
@@ -117,6 +125,9 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
                 Argument::Validators(validators) => {
                     args.validators.extend(validators);
                 },
+                Argument::Transparent(metas) => {
+                    args.transparents.extend(metas);
+                },
             }
         }
         args
@@ -133,6 +144,7 @@ pub(crate) enum Argument {
     NewUnchecked(NewUnchecked),
     Sanitizers(Punctuated<Sanitizer, Comma>),
     Validators(Punctuated<Validator, Comma>),
+    Transparent(Punctuated<syn::Meta, Comma>),
 }
 
 impl Parse for Argument {
@@ -160,7 +172,9 @@ impl Parse for Argument {
             "validators" => {
                 Self::Validators(input.parse_parenthesized::<Validator>()?)
             },
-            // TODO: remove branch
+            "attrs" => {
+                Self::Transparent(input.parse_parenthesized::<syn::Meta>()?)
+            },
             _ => {
                 return Err(syn::Error::new_spanned(ident, "Unknown argument."))
             },
