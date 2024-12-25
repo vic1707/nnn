@@ -32,7 +32,6 @@ impl Sanitizer {
             Self::Each(ref steps) => {
                 let inner_steps = steps.iter().map(Self::step);
                 parse_quote! {{
-                    // TODO: is .cloned() really the solution ?
                     value = value.into_iter().map(|mut value| {
                         #(#inner_steps)*
                         value
