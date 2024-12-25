@@ -10,15 +10,16 @@ pub(crate) enum RegexInput {
 impl Parse for RegexInput {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let regex = if let Ok(lit_str) = input.parse::<syn::LitStr>() {
-            /* TODO: Enable this properly
-            // Compile time check for literal regex
-            regex::Regex::new(&lit_str.value()).map_err(|err| {
-                syn::Error::new_spanned(
-                    &lit_str,
-                    format!("Incorrect Regex {err}"),
-                )
-            })?;
-            */
+            #[cfg(feature = "regex_validation")]
+            {
+                // Compile time check for literal regex
+                regex::Regex::new(&lit_str.value()).map_err(|err| {
+                    syn::Error::new_spanned(
+                        &lit_str,
+                        format!("Incorrect Regex {err}"),
+                    )
+                })?;
+            };
             Self::StringLiteral(lit_str)
         } else {
             Self::Path(input.parse::<syn::Path>()?)
