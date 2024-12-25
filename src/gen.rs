@@ -1,7 +1,6 @@
 /* Modules */
 mod impl_item;
 mod test_fn;
-/* Built-in imports */
 /* Dependencies */
 use syn::{parse_quote, punctuated::Punctuated, token::Comma};
 /* Re-exports */
