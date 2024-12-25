@@ -31,6 +31,9 @@ pub(crate) enum Implementation {
     ErrorDisplayArm(Vec<syn::Arm>),
 
     SanitizationStep(syn::Block),
+
+    Enum(syn::ItemEnum),
+    Export(syn::ItemUse),
 }
 
 impl Implementation {
@@ -64,6 +67,8 @@ impl Implementation {
                 arms.iter_mut()
                     .for_each(|arm| arm.attrs.push(cfg_attr.clone()));
             },
+            Self::Export(ref mut r#use) => r#use.attrs.push(cfg_attr),
+            Self::Enum(ref mut item) => item.attrs.push(cfg_attr),
         }
     }
 
@@ -78,6 +83,8 @@ impl Implementation {
         impl Iterator<Item = &syn::Block>,
         impl Iterator<Item = &syn::Arm>,
         impl Iterator<Item = &syn::Block>,
+        impl Iterator<Item = &syn::ItemEnum>,
+        impl Iterator<Item = &syn::ItemUse>,
     ) {
         let impl_blocks = impls.iter().filter_map(|item| match *item {
             Self::ItemImpl(ref el) => Some(el),
@@ -119,6 +126,15 @@ impl Implementation {
             _ => None,
         });
 
+        let enums = impls.iter().filter_map(|item| match *item {
+            Self::Enum(ref el) => Some(el),
+            _ => None,
+        });
+        let exports = impls.iter().filter_map(|item| match *item {
+            Self::Export(ref el) => Some(el),
+            _ => None,
+        });
+
         (
             impl_blocks,
             impl_items,
@@ -127,6 +143,8 @@ impl Implementation {
             validity_checks,
             err_display_arm,
             sanitization_steps,
+            enums,
+            exports,
         )
     }
 }

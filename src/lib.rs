@@ -52,6 +52,8 @@ fn expand(
         validity_checks,
         err_display_arm,
         sanitization_steps,
+        new_enums,
+        exports,
     ) = gen::Implementation::separate_variants(&impls);
 
     let dedup_err_variants = err_variants.collect::<HashSet<_>>().into_iter();
@@ -106,6 +108,8 @@ fn expand(
 
             #(#impl_blocks)*
 
+            #(#new_enums)*
+
             #[cfg(test)]
             mod tests {
                 use super::*;
@@ -116,5 +120,6 @@ fn expand(
 
         #[allow(clippy::pub_use, reason = "pub use can happen if struct is meant to be public.")]
         #original_visibility use #mod_name::{#type_name, #error_name};
+        #(#exports)*
     })
 }
