@@ -136,8 +136,9 @@ impl gen::Gen for NNNDerive {
                             type Err = #parse_err_name;
 
                             fn from_str(input: &str) -> ::core::result::Result<Self, Self::Err> {
-                                let parsed = <#inner_type>::from_str(input).map_err(#parse_err_name::InnerParse)?;
-                                Self::try_new(parsed).map_err(#parse_err_name::Validation)
+                                Self::try_new(
+                                    input.parse().map_err(#parse_err_name::InnerParse)?
+                                ).map_err(#parse_err_name::Validation)
                             }
                         }
                     }),

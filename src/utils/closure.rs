@@ -3,10 +3,10 @@ use syn::parse::{Parse, ParseStream};
 
 #[derive(Debug)]
 /// Either
-/// with = `path::to::fn`
-/// with = |input: Type| { ...; return .. }
-/// with = { instructions; }
-pub(crate) enum WithFunction {
+/// custom = `path::to::fn`
+/// custom = |input: Type| { ...; return .. }
+/// custom = { instructions; }
+pub(crate) enum CustomFunction {
     /// Path to the function to run of signature
     /// Fn(mut Inner) -> Inner
     /// mut being optional
@@ -20,7 +20,7 @@ pub(crate) enum WithFunction {
     Block(syn::Block),
 }
 
-impl Parse for WithFunction {
+impl Parse for CustomFunction {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let closure = if let Ok(path) = input.parse::<syn::Path>() {
             Self::Path(path)
@@ -31,7 +31,7 @@ impl Parse for WithFunction {
         } else {
             return Err(syn::Error::new(
                 input.span(),
-                "Invalid `with` argument input.",
+                "Invalid `custom` argument input.",
             ));
         };
 

@@ -38,7 +38,7 @@ pub(crate) enum Validator {
     // Commons
     Exactly(syn::Expr),
     // TODO: also takes in an error type
-    // With
+    // Custom
 }
 
 impl gen::Gen for Validator {

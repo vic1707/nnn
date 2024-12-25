@@ -3,7 +3,7 @@ use nnn::nnn;
 /* Dependencies */
 use rstest::rstest;
 
-#[nnn(sanitizers(with = |value: String| value.to_uppercase() ))]
+#[nnn(sanitizers(custom = |value: String| value.to_uppercase() ))]
 struct SanitizedWithClosureString(String);
 
 #[rstest]
@@ -25,7 +25,7 @@ fn sanitize_uppercase_with_closure(
 fn sanitizer(value: String) -> String {
     value.to_uppercase()
 }
-#[nnn(sanitizers(with = sanitizer))]
+#[nnn(sanitizers(custom = sanitizer))]
 struct SanitizedWithFnPathString(String);
 
 #[rstest]
@@ -40,7 +40,7 @@ fn sanitize_uppercase_with_fn_path(
     assert_eq!(sanitized.into_inner(), expected);
 }
 
-#[nnn(sanitizers(with = { value = value.to_uppercase(); } ))]
+#[nnn(sanitizers(custom = { value = value.to_uppercase(); } ))]
 struct SanitizedWithBlockString(String);
 
 #[rstest]

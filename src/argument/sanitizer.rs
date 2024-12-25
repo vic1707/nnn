@@ -3,7 +3,7 @@ use core::iter;
 /* Crate imports */
 use crate::{
     gen,
-    utils::{closure::WithFunction, syn_ext::SynParseBufferExt as _},
+    utils::{closure::CustomFunction, syn_ext::SynParseBufferExt as _},
 };
 /* Dependencies */
 use syn::{
@@ -24,7 +24,7 @@ pub(crate) enum Sanitizer {
     Lowercase,
     Uppercase,
     // Commons
-    With(WithFunction),
+    Custom(CustomFunction),
 }
 
 impl Sanitizer {
@@ -51,12 +51,12 @@ impl Sanitizer {
                 parse_quote! {{ value = value.to_uppercase().to_owned(); }}
             },
             // Common
-            Self::With(ref with) => match *with {
-                WithFunction::Block(ref block) => parse_quote! { #block },
-                WithFunction::Path(ref path) => {
+            Self::Custom(ref custom) => match *custom {
+                CustomFunction::Block(ref block) => parse_quote! { #block },
+                CustomFunction::Path(ref path) => {
                     parse_quote! {{ value = #path(value); }}
                 },
-                WithFunction::Closure(ref expr_closure) => {
+                CustomFunction::Closure(ref expr_closure) => {
                     parse_quote! {{ value = (#expr_closure)(value); }}
                 },
             },
@@ -86,7 +86,7 @@ impl Parse for Sanitizer {
             "lowercase" => Self::Lowercase,
             "uppercase" => Self::Uppercase,
             // Common
-            "with" => Self::With(input.parse_equal()?),
+            "custom" => Self::Custom(input.parse_equal()?),
             _ => {
                 return Err(syn::Error::new_spanned(name, "Unknown sanitizer."))
             },
