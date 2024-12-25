@@ -16,6 +16,10 @@ impl NNNType {
         format_ident!("{}Error", self.type_name())
     }
 
+    pub(crate) fn mod_name(&self) -> syn::Ident {
+        format_ident!("__private_{}", self.type_name())
+    }
+
     pub(crate) const fn inner_type(&self) -> &syn::Type {
         &self.inner_field.ty
     }

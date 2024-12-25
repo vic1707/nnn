@@ -9,7 +9,7 @@ use std::collections::HashSet;
 use argument::{Argument, Arguments};
 use nnn_type::NNNType;
 /* Dependencies imports */
-use quote::{format_ident, quote};
+use quote::quote;
 use syn::{parse::Parser as _, punctuated::Punctuated};
 
 #[proc_macro_attribute]
@@ -35,6 +35,7 @@ fn expand(
     );
 
     let new_type = NNNType::try_from((input, args))?;
+    let mod_name = new_type.mod_name();
     let type_name = new_type.type_name();
     let inner_type = new_type.inner_type();
     let error_name = new_type.error_name();
@@ -55,7 +56,6 @@ fn expand(
 
     let dedup_err_variants = err_variants.collect::<HashSet<_>>().into_iter();
 
-    let mod_name = format_ident!("__private_{}", new_type.type_name());
     Ok(quote! {
         #[doc(hidden)]
         #[allow(non_snake_case, reason = "Includes NNNType name which is probably CamelCase.")]
