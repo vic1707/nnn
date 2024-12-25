@@ -68,15 +68,29 @@ impl Arguments {
         &self,
         new_type: &crate::NNNType,
     ) -> Vec<gen::TestFn> {
-        (self.nnn_derives.iter().map(|der| der.gen_tests(new_type)))
-            .chain(self.consts.iter().map(|cst| cst.gen_tests(new_type)))
-            .chain(self.derives.iter().map(|der| der.gen_tests(new_type)))
-            .chain(self.default.iter().map(|def| def.gen_tests(new_type)))
-            .chain(self.new_unchecked.iter().map(|nu| nu.gen_tests(new_type)))
-            .chain(self.sanitizers.iter().map(|san| san.gen_tests(new_type)))
-            .chain(self.validators.iter().map(|val| val.gen_tests(new_type)))
-            .flatten()
-            .collect()
+        (self
+            .nnn_derives
+            .iter()
+            .flat_map(|der| der.gen_tests(new_type)))
+        .chain(self.consts.iter().flat_map(|cst| cst.gen_tests(new_type)))
+        .chain(self.derives.iter().flat_map(|der| der.gen_tests(new_type)))
+        .chain(self.default.iter().flat_map(|def| def.gen_tests(new_type)))
+        .chain(
+            self.new_unchecked
+                .iter()
+                .flat_map(|nu| nu.gen_tests(new_type)),
+        )
+        .chain(
+            self.sanitizers
+                .iter()
+                .flat_map(|san| san.gen_tests(new_type)),
+        )
+        .chain(
+            self.validators
+                .iter()
+                .flat_map(|val| val.gen_tests(new_type)),
+        )
+        .collect()
     }
 }
 

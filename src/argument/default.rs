@@ -37,11 +37,14 @@ impl gen::Gen for Default {
         }))
     }
 
-    fn gen_tests(&self, new_type: &crate::NNNType) -> Option<gen::TestFn> {
+    fn gen_tests(
+        &self,
+        new_type: &crate::NNNType,
+    ) -> impl Iterator<Item = gen::TestFn> {
         let type_name = new_type.type_name();
         let err_msg = format!("Type `{type_name}` has invalid default value.",);
 
-        Some(parse_quote! {
+        iter::once(parse_quote! {
             #[test]
             fn should_have_valid_default_value() {
                 let default_inner_value = #type_name::default().into_inner();

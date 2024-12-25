@@ -44,7 +44,10 @@ impl gen::Gen for AssociatedConst {
         )))
     }
 
-    fn gen_tests(&self, new_type: &crate::NNNType) -> Option<gen::TestFn> {
+    fn gen_tests(
+        &self,
+        new_type: &crate::NNNType,
+    ) -> impl Iterator<Item = gen::TestFn> {
         let const_name = &self.name;
         let type_name = new_type.type_name();
 
@@ -54,7 +57,7 @@ impl gen::Gen for AssociatedConst {
         let test_name =
             format_ident!("const_{const_name}_should_have_valid_value");
 
-        Some(parse_quote! {
+        iter::once(parse_quote! {
             #[test]
             fn #test_name() {
                 let inner_value = <#type_name>::#const_name.into_inner();

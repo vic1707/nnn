@@ -7,8 +7,8 @@ use syn::{punctuated::Punctuated, token::Comma};
 pub(crate) use self::{impl_item::ImplItem, test_fn::TestFn};
 
 pub(crate) trait Gen {
-    fn gen_tests(&self, _: &crate::NNNType) -> Option<TestFn> {
-        None
+    fn gen_tests(&self, _: &crate::NNNType) -> impl Iterator<Item = TestFn> {
+        [].into_iter()
     }
 
     fn gen_impl(
