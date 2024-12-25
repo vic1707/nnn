@@ -1,5 +1,6 @@
 /* Modules */
 mod associated_const;
+mod cfg;
 mod default;
 mod derive;
 mod new_unchecked;
@@ -8,9 +9,9 @@ mod sanitizer;
 mod validator;
 /* Crate imports */
 use self::{
-    associated_const::AssociatedConst, default::Default, derive::Derive,
-    new_unchecked::NewUnchecked, nnn_derive::NNNDerive, sanitizer::Sanitizer,
-    validator::Validator,
+    associated_const::AssociatedConst, cfg::Cfg, default::Default,
+    derive::Derive, new_unchecked::NewUnchecked, nnn_derive::NNNDerive,
+    sanitizer::Sanitizer, validator::Validator,
 };
 use crate::{
     gen::{self, Gen as _},
@@ -32,6 +33,7 @@ pub(crate) struct Arguments {
     new_unchecked: Option<NewUnchecked>,
     sanitizers: Vec<Sanitizer>,
     validators: Vec<Validator>,
+    cfgs: Vec<Cfg>,
 }
 
 impl Arguments {
@@ -43,6 +45,7 @@ impl Arguments {
             .nnn_derives
             .iter()
             .flat_map(|der| der.gen_impl(new_type)))
+        .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_impl(new_type)))
         .chain(self.consts.iter().flat_map(|cst| cst.gen_impl(new_type)))
         .chain(self.derives.iter().flat_map(|der| der.gen_impl(new_type)))
         .chain(self.default.iter().flat_map(|def| def.gen_impl(new_type)))
@@ -72,6 +75,7 @@ impl Arguments {
             .nnn_derives
             .iter()
             .flat_map(|der| der.gen_tests(new_type)))
+        .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_tests(new_type)))
         .chain(self.consts.iter().flat_map(|cst| cst.gen_tests(new_type)))
         .chain(self.derives.iter().flat_map(|der| der.gen_tests(new_type)))
         .chain(self.default.iter().flat_map(|def| def.gen_tests(new_type)))
@@ -102,6 +106,7 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
                 Argument::NNNDerive(derives) => {
                     args.nnn_derives.extend(derives);
                 },
+                Argument::Cfg(cfg) => args.cfgs.push(cfg),
                 Argument::Consts(consts) => args.consts.extend(consts),
                 Argument::Derive(derives) => args.derives.extend(derives),
                 Argument::Default(default) => args.default = Some(default),
@@ -121,6 +126,7 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
 #[derive(Debug)]
 pub(crate) enum Argument {
     NNNDerive(Punctuated<NNNDerive, Comma>),
+    Cfg(Cfg),
     Consts(Punctuated<AssociatedConst, Comma>),
     Derive(Punctuated<Derive, Comma>),
     Default(Default),
@@ -136,6 +142,7 @@ impl Parse for Argument {
             "nnn_derive" => {
                 Self::NNNDerive(input.parse_parenthesized::<NNNDerive>()?)
             },
+            "cfg" => Self::Cfg(input.parse::<Cfg>()?),
             "consts" => {
                 Self::Consts(input.parse_parenthesized::<AssociatedConst>()?)
             },

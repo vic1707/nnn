@@ -59,6 +59,7 @@ impl gen::Gen for Validator {
 impl Validator {
     pub(crate) fn has_finite(&self) -> bool {
         #[expect(clippy::wildcard_enum_match_arm, reason = "_")]
+        // Note: Self::Cfg will always be false. See the readme.
         match *self {
             Self::Each(ref steps) => steps.iter().any(Self::has_finite),
             Self::Finite => true,

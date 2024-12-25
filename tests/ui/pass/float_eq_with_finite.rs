@@ -5,3 +5,6 @@ use nnn::nnn;
 struct FiniteFloat(f64);
 
 fn main() {}
+
+#[nnn(cfg(test, derive(PartialEq, Eq), validators(finite)))]
+struct FiniteFloat2(f64);

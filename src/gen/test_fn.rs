@@ -1,8 +1,17 @@
 /* Dependencies */
-use syn::parse::{Parse, ParseStream};
+use syn::{
+    parse::{Parse, ParseStream},
+    parse_quote,
+};
 
 #[derive(Debug)]
 pub(crate) struct TestFn(syn::ItemFn);
+
+impl TestFn {
+    pub(crate) fn make_conditional(&mut self, condition: &syn::Expr) {
+        self.0.attrs.push(parse_quote! { #[cfg(#condition)] });
+    }
+}
 
 impl Parse for TestFn {
     fn parse(input: ParseStream) -> syn::Result<Self> {

@@ -1,8 +1,9 @@
 /* Modules */
 mod impl_item;
 mod test_fn;
+/* Built-in imports */
 /* Dependencies */
-use syn::{punctuated::Punctuated, token::Comma};
+use syn::{parse_quote, punctuated::Punctuated, token::Comma};
 /* Re-exports */
 pub(crate) use self::{impl_item::ImplItem, test_fn::TestFn};
 
@@ -34,6 +35,39 @@ pub(crate) enum Implementation {
 }
 
 impl Implementation {
+    pub(crate) fn make_conditional(&mut self, condition: &syn::Expr) {
+        let cfg_attr: syn::Attribute = parse_quote! { #[cfg(#condition)] };
+
+        match *self {
+            Self::ItemImpl(ref mut item_impl) => item_impl.attrs.push(cfg_attr),
+            Self::ImplItem(ref mut item_impl) => {
+                item_impl.attrs_mut().push(cfg_attr);
+            },
+            Self::Attribute(ref mut attrs) => {
+                for attr in attrs.iter_mut() {
+                    let inner = &attr.meta;
+                    *attr = parse_quote! { #[cfg_attr(#condition, #inner)]};
+                }
+            },
+            Self::ErrorVariant(ref mut punctuated) => {
+                punctuated
+                    .iter_mut()
+                    .for_each(|variant| variant.attrs.push(cfg_attr.clone()));
+            },
+            Self::ValidityCheck(ref mut block)
+            | Self::SanitizationStep(ref mut block) => {
+                *block = parse_quote! {{
+                    #cfg_attr
+                    #block
+                }};
+            },
+            Self::ErrorDisplayArm(ref mut arms) => {
+                arms.iter_mut()
+                    .for_each(|arm| arm.attrs.push(cfg_attr.clone()));
+            },
+        }
+    }
+
     #[expect(clippy::wildcard_enum_match_arm, reason = "Specific extractions.")]
     pub(crate) fn separate_variants(
         impls: &[Self],

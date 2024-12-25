@@ -1,3 +1,6 @@
+/* Dependencies */
+use syn::Attribute;
+
 #[derive(Debug)]
 /// Basically [`syn::ImplItem`] without the `Verbatim` variant.
 pub(crate) enum ImplItem {
@@ -5,6 +8,17 @@ pub(crate) enum ImplItem {
     Fn(syn::ImplItemFn),
     Macro(syn::ImplItemMacro),
     Type(syn::ImplItemType),
+}
+
+impl ImplItem {
+    pub(crate) fn attrs_mut(&mut self) -> &mut Vec<Attribute> {
+        match *self {
+            Self::Const(ref mut impl_item_const) => &mut impl_item_const.attrs,
+            Self::Fn(ref mut impl_item_fn) => &mut impl_item_fn.attrs,
+            Self::Macro(ref mut impl_item_macro) => &mut impl_item_macro.attrs,
+            Self::Type(ref mut impl_item_type) => &mut impl_item_type.attrs,
+        }
+    }
 }
 
 impl quote::ToTokens for ImplItem {
