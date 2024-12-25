@@ -41,6 +41,8 @@ mod sanitizers {
     mod trim;
     mod lowercase;
     mod uppercase;
+    // Common
+    mod with;
 }
 
 #[cfg(test)]

@@ -1,7 +1,10 @@
 /* Built-in imports */
 use core::iter;
 /* Crate imports */
-use crate::{gen, utils::syn_ext::SynParseBufferExt as _};
+use crate::{
+    gen,
+    utils::{closure::WithFunction, syn_ext::SynParseBufferExt as _},
+};
 /* Dependencies */
 use syn::{
     parse::{Parse, ParseStream},
@@ -21,8 +24,7 @@ pub(crate) enum Sanitizer {
     Lowercase,
     Uppercase,
     // Commons
-    // TODOs
-    // With
+    With(WithFunction),
 }
 
 impl Sanitizer {
@@ -47,6 +49,16 @@ impl Sanitizer {
             },
             Self::Uppercase => {
                 parse_quote! {{ value = value.to_uppercase().to_owned(); }}
+            },
+            // Common
+            Self::With(ref with) => match *with {
+                WithFunction::Block(ref block) => parse_quote! { #block },
+                WithFunction::Path(ref path) => {
+                    parse_quote! {{ value = #path(value); }}
+                },
+                WithFunction::Closure(ref expr_closure) => {
+                    parse_quote! {{ value = (#expr_closure)(value); }}
+                },
             },
         }
     }
@@ -73,6 +85,8 @@ impl Parse for Sanitizer {
             "trim" => Self::Trim,
             "lowercase" => Self::Lowercase,
             "uppercase" => Self::Uppercase,
+            // Common
+            "with" => Self::With(input.parse_equal()?),
             _ => {
                 return Err(syn::Error::new_spanned(name, "Unknown sanitizer."))
             },
