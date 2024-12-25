@@ -1,5 +1,5 @@
 /* Crate imports */
-use crate::utils::syn_ext::SynDataExt as _;
+use crate::{argument::Arguments, utils::syn_ext::SynDataExt as _};
 /* Dependencies */
 use quote::{format_ident, quote};
 
@@ -8,6 +8,7 @@ pub(crate) struct NNNType {
     inner_field: syn::Field,
     generics: syn::Generics,
     type_name: syn::Ident,
+    arguments: Arguments,
 }
 
 impl NNNType {
@@ -26,6 +27,10 @@ impl NNNType {
     pub(crate) const fn type_name(&self) -> &syn::Ident {
         &self.type_name
     }
+
+    pub(crate) const fn args(&self) -> &Arguments {
+        &self.arguments
+    }
 }
 
 impl quote::ToTokens for NNNType {
@@ -34,6 +39,7 @@ impl quote::ToTokens for NNNType {
             ref generics,
             ref inner_field,
             ref type_name,
+            ..
         } = *self;
         let where_clause = &generics.where_clause;
 
@@ -43,10 +49,10 @@ impl quote::ToTokens for NNNType {
     }
 }
 
-impl TryFrom<syn::DeriveInput> for NNNType {
+impl TryFrom<(syn::DeriveInput, Arguments)> for NNNType {
     type Error = syn::Error;
 
-    fn try_from(input: syn::DeriveInput) -> Result<Self, Self::Error> {
+    fn try_from((input, arguments): (syn::DeriveInput, Arguments)) -> Result<Self, Self::Error> {
         if let Some(attr) = input.attrs.first() {
             return Err(syn::Error::new_spanned(
                 attr,
@@ -104,6 +110,7 @@ impl TryFrom<syn::DeriveInput> for NNNType {
             generics,
             type_name,
             inner_field: inner_field.clone(),
+            arguments,
         })
     }
 }

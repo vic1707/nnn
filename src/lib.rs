@@ -29,20 +29,20 @@ fn expand(
     let input: syn::DeriveInput = syn::parse(type_definition)?;
     let original_visibility = input.vis.clone();
 
-    let new_type = NNNType::try_from(input)?;
+    let args = Arguments::from(
+        Punctuated::<Argument, syn::Token![,]>::parse_terminated
+            .parse(nnn_args)?,
+    );
+
+    let new_type = NNNType::try_from((input, args))?;
     let type_name = new_type.type_name();
     let inner_type = new_type.inner_type();
     let error_name = new_type.error_name();
     let (impl_generics, ty_generics, where_clause) =
         new_type.generics().split_for_impl();
 
-    let args = Arguments::from(
-        Punctuated::<Argument, syn::Token![,]>::parse_terminated
-            .parse(nnn_args)?,
-    );
-
-    let tests = args.get_tests(&new_type);
-    let impls = args.get_impls(&new_type);
+    let tests = new_type.args().get_tests(&new_type);
+    let impls = new_type.args().get_impls(&new_type);
     let (
         impl_blocks,
         bare_impls,
