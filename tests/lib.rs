@@ -26,6 +26,7 @@ mod validators {
     // Common
     mod exactly;
     mod custom;
+    mod predicate;
 }
 #[rustfmt::skip] // wants to reorder modules
 mod derives {
