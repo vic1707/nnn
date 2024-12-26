@@ -64,3 +64,5 @@ jobs:
 
       - name: Zizmor
         run: zizmor .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
