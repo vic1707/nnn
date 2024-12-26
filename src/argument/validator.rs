@@ -1,7 +1,11 @@
 /* Crate imports */
 use crate::{
     gen,
-    utils::{regex_input::RegexInput, syn_ext::SynParseBufferExt as _},
+    utils::{
+        closure::CustomFunction,
+        regex_input::RegexInput,
+        syn_ext::{SynParseBufferExt as _, SynPathExt as _},
+    },
 };
 /* Dependencies */
 use quote::ToTokens as _;
@@ -37,8 +41,12 @@ pub(crate) enum Validator {
     Regex(RegexInput),
     // Commons
     Exactly(syn::Expr),
-    // TODO: also takes in an error type
-    // Custom
+    Custom {
+        check: CustomFunction,
+        error: syn::Path,
+        /// derived from error path
+        error_name: syn::Ident,
+    },
 }
 
 impl gen::Gen for Validator {
@@ -123,6 +131,13 @@ impl Validator {
             Self::Regex(_) => parse_quote! { Regex },
             // Commons
             Self::Exactly(_) => parse_quote! { Exactly },
+            Self::Custom {
+                ref error,
+                ref error_name,
+                ..
+            } => {
+                parse_quote! { #error_name(#error) }
+            },
         }
     }
 
@@ -224,6 +239,21 @@ impl Validator {
                     #[allow(clippy::float_cmp, reason = "Allows transparency between signed numbers and floats.")]
                     if value != #val { return Err(#error_type::Exactly) }
                 }}
+            },
+            Self::Custom {
+                ref check,
+                ref error_name,
+                ..
+            } => match *check {
+                CustomFunction::Block(ref block) => parse_quote! {{
+                    if let Err(err) = #block { return Err(#error_type::#error_name(err)) }
+                }},
+                CustomFunction::Path(ref func) => parse_quote! {{
+                    if let Err(err) = #func(&value) { return Err(#error_type::#error_name(err)) }
+                }},
+                CustomFunction::Closure(ref expr_closure) => parse_quote! {{
+                    if let Err(err) = (#expr_closure)(&value) { return Err(#error_type::#error_name(err)) }
+                }},
             },
         }
     }
@@ -357,6 +387,11 @@ impl Validator {
                 );
                 parse_quote! { Self::Exactly => write!(fmt, #msg), }
             },
+            Self::Custom { ref error_name, .. } => {
+                let msg =
+                    format!("[{type_name}] Value should be exactly {{}}.");
+                parse_quote! { Self::#error_name(ref inner_err) => write!(fmt, #msg, inner_err), }
+            },
         }
     }
 }
@@ -387,6 +422,25 @@ impl Parse for Validator {
             "not_nan" => Self::NotNAN,
             // String specifics
             "regex" => Self::Regex(input.parse_equal()?),
+            "custom" => {
+                let content;
+                syn::parenthesized!(content in input);
+
+                content.require_ident("with")?;
+                let check = content.parse_equal()?;
+
+                content.parse::<syn::Token![,]>()?;
+
+                content.require_ident("error")?;
+                let error = content.parse_equal::<syn::Path>()?;
+                let error_name = error.as_ident();
+
+                Self::Custom {
+                    check,
+                    error,
+                    error_name,
+                }
+            },
             _ => {
                 return Err(syn::Error::new_spanned(name, "Unknown validator."))
             },

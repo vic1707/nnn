@@ -1,4 +1,7 @@
+/* Crate imports */
+use crate::utils;
 /* Dependencies */
+use quote::ToTokens as _;
 use syn::{
     parse::{Parse, ParseBuffer},
     punctuated::Punctuated,
@@ -25,6 +28,7 @@ pub(crate) trait SynParseBufferExt {
     fn parse_parenthesized<T: Parse>(
         &self,
     ) -> syn::Result<Punctuated<T, Comma>>;
+    fn require_ident(&self, name: &str) -> syn::Result<syn::Ident>;
 }
 
 impl SynParseBufferExt for ParseBuffer<'_> {
@@ -45,5 +49,36 @@ impl SynParseBufferExt for ParseBuffer<'_> {
         let content;
         syn::parenthesized!(content in self);
         content.parse_terminated(T::parse, syn::Token![,])
+    }
+
+    fn require_ident(&self, name: &str) -> syn::Result<syn::Ident> {
+        let ident = self.parse::<syn::Ident>()?;
+        if ident != name {
+            return Err(syn::Error::new_spanned(
+                ident,
+                format!("Expected ident to be `{name}`."),
+            ));
+        }
+        Ok(ident)
+    }
+}
+
+pub(crate) trait SynPathExt {
+    fn as_ident(&self) -> syn::Ident;
+}
+
+impl SynPathExt for syn::Path {
+    /// turns `std::io::Error` into `StdIoError`
+    fn as_ident(&self) -> syn::Ident {
+        quote::format_ident!(
+            "{}",
+            self.to_token_stream()
+                .to_string()
+                .to_ascii_lowercase()
+                .replace(':', "")
+                .split_ascii_whitespace()
+                .map(utils::capitalize)
+                .collect::<String>()
+        )
     }
 }
