@@ -8,7 +8,7 @@ use crate::{
     },
 };
 /* Dependencies */
-use quote::ToTokens as _;
+use quote::{format_ident, ToTokens as _};
 use syn::{
     parse::{Parse, ParseStream},
     parse_quote,
@@ -46,6 +46,11 @@ pub(crate) enum Validator {
         error: syn::Path,
         /// derived from error path
         error_name: syn::Ident,
+    },
+    Predicate {
+        check: CustomFunction,
+        // if optional and defaults to `Predicate`.
+        variant: syn::Ident,
     },
 }
 
@@ -137,6 +142,9 @@ impl Validator {
                 ..
             } => {
                 parse_quote! { #error_name(#error) }
+            },
+            Self::Predicate { ref variant, .. } => {
+                parse_quote! { #variant }
             },
         }
     }
@@ -254,6 +262,23 @@ impl Validator {
                 CustomFunction::Closure(ref expr_closure) => parse_quote! {{
                     if let Err(err) = (#expr_closure)(&value) { return Err(#error_type::#error_name(err)) }
                 }},
+            },
+            Self::Predicate {
+                ref check,
+                ref variant,
+                ..
+            } => match *check {
+                CustomFunction::Block(ref block) => parse_quote! {{
+                    if !#block { return Err(#error_type::#variant) }
+                }},
+                CustomFunction::Path(ref func) => parse_quote! {{
+                    if !#func(&value) { return Err(#error_type::#variant) }
+                }},
+                CustomFunction::Closure(ref expr_closure) => {
+                    parse_quote! {{
+                        if !(#expr_closure)(&value) { return Err(#error_type::#variant) }
+                    }}
+                },
             },
         }
     }
@@ -392,6 +417,10 @@ impl Validator {
                     format!("[{type_name}] Value should be exactly {{}}.");
                 parse_quote! { Self::#error_name(ref inner_err) => write!(fmt, #msg, inner_err), }
             },
+            Self::Predicate { ref variant, .. } => {
+                let msg = format!("[{type_name}] {variant} violated.");
+                parse_quote! { Self::#variant => write!(fmt, #msg), }
+            },
         }
     }
 }
@@ -440,6 +469,22 @@ impl Parse for Validator {
                     error,
                     error_name,
                 }
+            },
+            "predicate" => {
+                let content;
+                syn::parenthesized!(content in input);
+
+                content.require_ident("with")?;
+                let check = content.parse_equal()?;
+
+                let variant = if content.parse::<syn::Token![,]>().is_ok() {
+                    content.require_ident("error_name")?;
+                    content.parse_equal::<syn::Ident>()?
+                } else {
+                    format_ident!("Predicate")
+                };
+
+                Self::Predicate { check, variant }
             },
             _ => {
                 return Err(syn::Error::new_spanned(name, "Unknown validator."))
