@@ -1,6 +1,6 @@
 #![expect(unused_imports, reason = "Not what we're testing.")]
 //! Is compile time error if feature `regex_validation` is enabled
-//! Else it will compile but fail at runtime.
+//! else it will compile but fail generated tests.
 use nnn::nnn;
 
 #[nnn(validators(regex = r#"(\d+"#))]

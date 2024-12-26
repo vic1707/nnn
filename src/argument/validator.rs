@@ -53,6 +53,31 @@ impl gen::Gen for Validator {
         ]
         .into_iter()
     }
+
+    fn gen_tests(
+        &self,
+        _: &crate::NNNType,
+    ) -> impl Iterator<Item = gen::TestFn> {
+        if let Self::Regex(ref regex) = *self {
+            let check: syn::Stmt = match *regex {
+                RegexInput::Path(ref path) => {
+                    parse_quote! { ::regex::Regex::new(#path.as_str()).unwrap(); }
+                },
+                RegexInput::StringLiteral(ref lit) => {
+                    parse_quote! { ::regex::Regex::new(&#lit).unwrap(); }
+                },
+            };
+
+            vec![parse_quote! {
+                #[test]
+                fn regex_validator_should_be_valid() {
+                    #check
+                }
+            }]
+        } else {
+            vec![]
+        }.into_iter()
+    }
 }
 
 #[expect(clippy::too_many_lines, reason = "Lots of validators.")]
