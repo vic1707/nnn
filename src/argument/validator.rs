@@ -111,7 +111,6 @@ impl Validator {
             // Numerics
             Self::Min(_) => parse_quote! { Min },
             Self::MinOrEq(_) => parse_quote! { MinOrEq },
-            Self::Exactly(_) => parse_quote! { Exactly },
             Self::Max(_) => parse_quote! { Max },
             Self::MaxOrEq(_) => parse_quote! { MaxOrEq },
             Self::Positive => parse_quote! { Positive },
@@ -122,6 +121,8 @@ impl Validator {
             Self::NotNAN => parse_quote! { NotNAN },
             // String specifics
             Self::Regex(_) => parse_quote! { Regex },
+            // Commons
+            Self::Exactly(_) => parse_quote! { Exactly },
         }
     }
 
@@ -171,12 +172,6 @@ impl Validator {
             Self::MinOrEq(ref val) => {
                 parse_quote! {{ if !(value >= #val) { return Err(#error_type::MinOrEq) } }}
             },
-            Self::Exactly(ref val) => {
-                parse_quote! {{
-                    #[allow(clippy::float_cmp, reason = "Allows transparency between signed numbers and floats.")]
-                    if value != #val { return Err(#error_type::Exactly) }
-                }}
-            },
             Self::Max(ref val) => {
                 parse_quote! {{ if !(value < #val) { return Err(#error_type::Max) } }}
             },
@@ -221,6 +216,13 @@ impl Validator {
                 };
                 parse_quote! {{
                     if #condition { return Err(#error_type::Regex) }
+                }}
+            },
+            // Commons
+            Self::Exactly(ref val) => {
+                parse_quote! {{
+                    #[allow(clippy::float_cmp, reason = "Allows transparency between signed numbers and floats.")]
+                    if value != #val { return Err(#error_type::Exactly) }
                 }}
             },
         }
@@ -295,13 +297,6 @@ impl Validator {
                 );
                 parse_quote! { Self::MinOrEq => write!(fmt, #msg), }
             },
-            Self::Exactly(ref val) => {
-                let msg = format!(
-                    "[{type_name}] Value should be exactly {}.",
-                    val.to_token_stream()
-                );
-                parse_quote! { Self::Exactly => write!(fmt, #msg), }
-            },
             Self::Max(ref val) => {
                 let msg = format!(
                     "[{type_name}] Value should be lesser than {}.",
@@ -353,6 +348,14 @@ impl Validator {
                 parse_quote! {
                     Self::Regex => write!(fmt, "[{}] Value should match `{}`.", stringify!(#type_name), #regex_expression_display),
                 }
+            },
+            // Commons
+            Self::Exactly(ref val) => {
+                let msg = format!(
+                    "[{type_name}] Value should be exactly {}.",
+                    val.to_token_stream()
+                );
+                parse_quote! { Self::Exactly => write!(fmt, #msg), }
             },
         }
     }
