@@ -1,0 +1,66 @@
+name: Hygiene
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_dispatch:
+
+jobs:
+  code-hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Install Rust
+        uses: IronCoreLabs/rust-toolchain@v1
+
+      - name: Rustfmt
+        run: cargo fmt --all --check
+
+      - name: Clippy
+        run: cargo clippy --all-features
+
+      - name: Check for typos
+        uses: crate-ci/typos@v1.28.4
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: "Tests (features: default)"
+        run: cargo test --no-fail-fast
+
+      - name: "Tests (features: none)"
+        run: cargo test --no-default-features --no-fail-fast
+
+      - name: "Tests (features: all)"
+        run: cargo test --all-features --no-fail-fast
+
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Install Zizmor
+        uses: taiki-e/install-action@v2.46.20
+        with:
+          tool: zizmor
+
+      - name: Zizmor
+        run: zizmor .
