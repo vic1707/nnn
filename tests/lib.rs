@@ -50,10 +50,17 @@ mod ui {
     #[test]
     fn ui_pass() {
         trybuild::TestCases::new().pass("tests/ui/pass/*.rs");
+        #[cfg(not(feature = "regex_validation"))]
+        trybuild::TestCases::new()
+            .pass("tests/ui/conditionals/invalid_compile_time_regex.rs");
     }
 
     #[test]
     fn ui_fail() {
         trybuild::TestCases::new().compile_fail("tests/ui/fail/*.rs");
+        #[cfg(feature = "regex_validation")]
+        trybuild::TestCases::new().compile_fail(
+            "tests/ui/conditionals/invalid_compile_time_regex.rs",
+        );
     }
 }

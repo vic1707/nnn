@@ -1,0 +1,8 @@
+error: Incorrect Regex regex parse error:
+           (\d+
+           ^
+       error: unclosed group
+ --> tests/ui/conditionals/invalid_compile_time_regex.rs:6:26
+  |
+6 | #[nnn(validators(regex = r#"(\d+"#))]
+  |                          ^^^^^^^^^
