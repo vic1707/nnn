@@ -20,6 +20,5 @@ rustflags = [
     "-Aclippy::single_call_fn",          # convenience
     "-Aclippy::ref_patterns",
     ## Maybe remove one day ##
-    "-Aclippy::cargo_common_metadata",
     "-Aclippy::missing_docs_in_private_items",
 ]
