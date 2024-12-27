@@ -2,6 +2,22 @@
 name = "nnn"
 version = "0.0.0"
 edition = "2021"
+authors = ["Victor LEFEBVRE <contact@vic1707.xyz>"]
+description = "Generate your newtypes from a single macro."
+documentation = "https://docs.rs/nnn"
+homepage = "https://github.com/vic1707/nnn"
+license = "WTFPL"
+readme = "README.md"
+repository = "https://github.com/vic1707/nnn"
+include = [
+    "src/",
+    "Cargo.toml",
+    "Cargo.lock",
+    "README.md",
+    "LICENSE",
+]
+categories = ["data-structures", "rust-patterns"]
+keywords = ["newtype", "validation", "sanitization", "derive", "invariant"]
 rust-version = "1.82.0"
 
 [lib]
