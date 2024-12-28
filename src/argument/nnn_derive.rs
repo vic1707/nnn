@@ -97,6 +97,7 @@ impl gen::Gen for NNNDerive {
                 vec![
                     gen::Implementation::Enum(parse_quote! {
                         #[derive(Debug)]
+                        #[non_exhaustive]
                         pub enum #impl_generics #parse_err_name #where_clause {
                             InnerParse(<#inner_type as ::core::str::FromStr>::Err),
                             Validation(#error_name),
