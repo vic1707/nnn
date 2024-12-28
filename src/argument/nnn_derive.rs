@@ -96,7 +96,7 @@ impl gen::Gen for NNNDerive {
                 let parse_err_name = format_ident!("{type_name}ParseError");
                 vec![
                     gen::Implementation::Enum(parse_quote! {
-                        #[derive(Debug)]
+                        #[derive(Debug, Clone, PartialEq, Eq)]
                         #[non_exhaustive]
                         pub enum #impl_generics #parse_err_name #where_clause {
                             InnerParse(<#inner_type as ::core::str::FromStr>::Err),

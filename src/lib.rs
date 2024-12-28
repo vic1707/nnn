@@ -67,7 +67,7 @@ fn expand(
             #(#macro_attrs)*
             #new_type
 
-            #[derive(Debug)]
+            #[derive(Debug, Clone, PartialEq, Eq)]
             #[non_exhaustive]
             pub enum #error_name {
                 #(#dedup_err_variants),*
