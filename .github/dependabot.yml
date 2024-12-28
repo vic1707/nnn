@@ -16,3 +16,6 @@ updates:
     schedule:
       interval: "weekly"
     groups:
+      actions-deps:
+        patterns:
+          - "*"
