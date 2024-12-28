@@ -1,7 +1,7 @@
 /* Crate imports */
-use crate::gen;
+use crate::{gen, utils::syn_ext::SynPathExt as _};
 /* Dependencies */
-use quote::{format_ident, ToTokens as _};
+use quote::format_ident;
 use syn::{
     parse::{Parse, ParseStream},
     parse_quote,
@@ -23,19 +23,7 @@ pub(crate) enum NNNDerive {
 impl Parse for NNNDerive {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let trait_path = syn::Path::parse(input)?;
-        match trait_path
-            .segments
-            .last()
-            .ok_or_else(|| {
-                syn::Error::new_spanned(
-                    &trait_path,
-                    "Trait doesn't have a name ??",
-                )
-            })?
-            .to_token_stream()
-            .to_string()
-            .as_str()
-        {
+        match trait_path.item_name()?.as_str() {
             "Into" => Ok(Self::Into),
             "From" => Ok(Self::From),
             "TryFrom" => Ok(Self::TryFrom),
