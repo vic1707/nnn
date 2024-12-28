@@ -2,7 +2,7 @@
 use core::iter;
 /* Crate imports */
 use super::Validator;
-use crate::gen;
+use crate::{gen, utils::syn_ext::SynPathExt as _};
 /* Dependencies */
 use quote::ToTokens as _;
 use syn::{
@@ -21,13 +21,7 @@ pub(crate) enum Derive {
 impl Parse for Derive {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let trait_path = syn::Path::parse(input)?;
-        match trait_path
-            .segments
-            .last()
-            .ok_or_else(|| syn::Error::new_spanned(&trait_path, "Trait doesn't have a name ??"))?
-            .to_token_stream()
-            .to_string()
-            .as_str()
+        match trait_path.item_name()?.as_str()
         {
             // Special cases
             "Eq" => Ok(Self::Eq(trait_path)),

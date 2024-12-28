@@ -65,6 +65,7 @@ impl SynParseBufferExt for ParseBuffer<'_> {
 
 pub(crate) trait SynPathExt {
     fn as_ident(&self) -> syn::Ident;
+    fn item_name(&self) -> syn::Result<String>;
 }
 
 impl SynPathExt for syn::Path {
@@ -80,5 +81,15 @@ impl SynPathExt for syn::Path {
                 .map(utils::capitalize)
                 .collect::<String>()
         )
+    }
+
+    fn item_name(&self) -> syn::Result<String> {
+        self.segments
+            .last()
+            .map(|seg| &seg.ident)
+            .map(ToString::to_string)
+            .ok_or_else(|| {
+                syn::Error::new_spanned(self, "Trait doesn't have a name ??")
+            })
     }
 }
