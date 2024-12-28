@@ -13,6 +13,7 @@ use syn::{
 #[derive(Debug)]
 pub(crate) enum Derive {
     Eq(syn::Path),
+    Ord(syn::Path),
     Deserialize(syn::Path),
     /// A derive that will be passed down transparently.
     Transparent(syn::Path),
@@ -25,6 +26,7 @@ impl Parse for Derive {
         {
             // Special cases
             "Eq" => Ok(Self::Eq(trait_path)),
+            "Ord" => Ok(Self::Ord(trait_path)),
             "Deserialize" => Ok(Self::Deserialize(trait_path)),
             // Forbidden derives
             derive_more @ (
@@ -49,13 +51,43 @@ impl gen::Gen for Derive {
     ) -> impl Iterator<Item = gen::Implementation> {
         iter::once(match *self {
             Self::Eq(ref path) => {
-                if new_type.args().validators.iter().any(Validator::has_finite)
+                if new_type
+                    .args()
+                    .validators
+                    .iter()
+                    .any(Validator::excludes_float_nan)
                 {
                     let type_name = new_type.type_name();
                     let (impl_generics, ty_generics, where_clause) =
                         new_type.generics().split_for_impl();
                     gen::Implementation::ItemImpl(parse_quote! {
                         impl #impl_generics #path for #type_name #ty_generics #where_clause {}
+                    })
+                } else {
+                    gen::Implementation::Attribute(
+                        parse_quote! { #[derive(#path)] },
+                    )
+                }
+            },
+            Self::Ord(ref path) => {
+                if new_type
+                    .args()
+                    .validators
+                    .iter()
+                    .any(Validator::excludes_float_nan)
+                {
+                    let type_name = new_type.type_name();
+                    let (impl_generics, ty_generics, where_clause) =
+                        new_type.generics().split_for_impl();
+                    let panic_msg = format!("{type_name}::cmp() panicked, because partial_cmp() returned None. Could it be that you're using unsafe {type_name}::new_unchecked() ?");
+                    gen::Implementation::ItemImpl(parse_quote! {
+                        #[expect(clippy::derive_ord_xor_partial_ord, reason = "Manual impl when involving floats.")]
+                        impl #impl_generics #path for #type_name #ty_generics #where_clause {
+                            fn cmp(&self, other: &Self) -> ::core::cmp::Ordering {
+                                self.partial_cmp(other)
+                                    .unwrap_or_else(|| panic!(#panic_msg))
+                            }
+                        }
                     })
                 } else {
                     gen::Implementation::Attribute(

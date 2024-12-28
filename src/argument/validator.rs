@@ -95,12 +95,12 @@ impl gen::Gen for Validator {
 
 #[expect(clippy::too_many_lines, reason = "Lots of validators.")]
 impl Validator {
-    pub(crate) fn has_finite(&self) -> bool {
+    pub(crate) fn excludes_float_nan(&self) -> bool {
         #[expect(clippy::wildcard_enum_match_arm, reason = "_")]
         // Note: Self::Cfg will always be false. See the readme.
         match *self {
-            Self::Each(ref steps) => steps.iter().any(Self::has_finite),
-            Self::Finite => true,
+            Self::Each(ref steps) => steps.iter().any(Self::excludes_float_nan),
+            Self::Finite | Self::NotNAN => true,
             _ => false,
         }
     }
