@@ -69,7 +69,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Zizmor
-        uses: taiki-e/install-action@v2.46.20
+        uses: taiki-e/install-action@v2.47.0
         with:
           tool: zizmor
 
