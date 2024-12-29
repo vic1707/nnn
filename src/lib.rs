@@ -3,7 +3,7 @@
 //! [<img alt="github" src="https://img.shields.io/badge/github-vic1707/nnn-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/vic1707/nnn)
 //! [<img alt="crates.io" src="https://img.shields.io/crates/v/nnn.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/nnn)
 //! [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/vic1707/nnn/hygiene.yml?branch=main&style=for-the-badge" height="20">](https://github.com/vic1707/nnn/actions?query=branch%3Amain)
-//! [<img alt="downloads" src="https://img.shields.io/crates/d/nnn.svg?style=for-the-badge&logo=docs.rs" height="20">](https://crates.io/crates/nnn)
+//! [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-nnn-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/nnn)
 //! [<img alt="lines" src="https://tokei.rs/b1/github/vic1707/nnn?type=Rust&style=for-the-badge?category=code&logo=https://simpleicons.org/icons/rust.svg" height="20">](https://github.com/vic1707/nnn)
 //! [<img alt="maintenance" src="https://img.shields.io/badge/maintenance-activly--developed-brightgreen.svg?style=for-the-badge" height="20">](https://github.com/vic1707/nnn)
 //!
