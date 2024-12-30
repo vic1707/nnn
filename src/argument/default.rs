@@ -30,8 +30,8 @@ impl gen::Gen for Default {
         iter::once(gen::Implementation::ItemImpl(parse_quote! {
             impl #impl_generics ::core::default::Default for #type_name #ty_generics #where_clause {
                 fn default() -> Self {
-                    #[doc = "Safety: Checked by automatically generated test."]
-                    unsafe { Self::try_new(#default_value).unwrap_unchecked() }
+                    #[doc = "Is checked by automatically generated test."]
+                    Self(#default_value)
                 }
             }
         }))
@@ -47,8 +47,13 @@ impl gen::Gen for Default {
         iter::once(parse_quote! {
             #[test]
             fn should_have_valid_default_value() {
-                let default_inner_value = #type_name::default().into_inner();
-                #type_name::try_new(default_inner_value).expect(#err_msg);
+                let default_inner = #type_name::default().into_inner();
+                let rebuilt_default = #type_name::try_new(default_inner).expect(#err_msg);
+                assert_eq!(
+                    default_inner,
+                    rebuilt_default.into_inner(),
+                    "Default and rebuilt default are different, maybe you didn't sanitize your default?"
+                );
             }
         })
     }
