@@ -17,7 +17,7 @@ struct Data {
 }
 
 #[rstest]
-#[case(r#"{ "foo": 0.0 }"#, 0.0_f64)]
+#[case(r#"{ "foo": 0.1 }"#, 0.1_f64)]
 #[case(r#"{ "foo": 3.0 }"#, 3.0_f64)]
 fn data_deserialization_valid(#[case] input: &str, #[case] expected: f64) {
     let deserialized =

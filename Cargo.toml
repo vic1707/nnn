@@ -34,6 +34,7 @@ default = []
 regex_validation = ["dep:regex"]
 
 [dev-dependencies]
+paste = "1.0.15"
 regex = "1.11.1"
 rstest = "0.23.0"
 serde = { version = "1.0.217", features = ["derive"] }

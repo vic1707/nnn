@@ -66,3 +66,36 @@ mod ui {
         );
     }
 }
+
+#[doc(hidden)]
+pub mod utils {
+    macro_rules! sign_tests {
+        ($sign_test:ident, $($ty:ty, valids = [$($valid:literal),*], invalids = [$($invalid:expr),*]),*) => {
+            $(
+                paste::paste! {
+                    mod [< $sign_test _ $ty >] {
+                        use rstest::rstest;
+                        use nnn::nnn;
+
+                        #[nnn(validators($sign_test))]
+                        struct NNN($ty);
+
+                        #[rstest]
+                        $(#[case($valid)])*
+                        fn [< valid_ $sign_test _ $ty >](#[case] input: $ty) {
+                            NNN::try_new(input).unwrap();
+                        }
+
+                        #[rstest]
+                        $(#[case($invalid)])*
+                        fn [< invalid_ $sign_test _ $ty >](#[case] input: $ty) {
+                            assert!(NNN::try_new(input).is_err());
+                        }
+                    }
+                }
+            )*
+        };
+    }
+
+    pub(crate) use sign_tests;
+}

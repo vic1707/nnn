@@ -203,14 +203,14 @@ impl Validator {
             },
             Self::Positive => {
                 parse_quote! {{
-                    #[allow(deprecated, reason = "Allows transparency between signed numbers and floats.")]
-                    if ! value.is_positive() { return Err(#error_type::Positive) }
+                    // Terrible hack since 0.into() doesn't work for floats
+                    if !(value > false.into()) { return Err(#error_type::Positive) }
                 }}
             },
             Self::Negative => {
                 parse_quote! {{
-                    #[allow(deprecated, reason = "Allows transparency between signed numbers and floats.")]
-                    if ! value.is_negative() { return Err(#error_type::Negative) }
+                    // Terrible hack since 0.into() doesn't work for floats
+                    if ! (value < false.into()) { return Err(#error_type::Negative) }
                 }}
             },
             // Float specifics

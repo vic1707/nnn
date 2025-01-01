@@ -183,8 +183,8 @@ The `validators` argument accepts the following options:
   - `min_or_eq = ...`: Ensures the value is greater than or equal to this value.
   - `max = ...`: Ensures the value is less than this value.
   - `max_or_eq = ...`: Ensures the value is less than or equal to this value.
-  - `positive`: Ensures the value is positive.
-  - `negative`: Ensures the value is negative.
+  - `positive`: Ensures the value is positive (excluding 0/-0/NAN).
+  - `negative`: Ensures the value is negative (excluding 0/-0/NAN).
 
 - **Float specifics**:
 
