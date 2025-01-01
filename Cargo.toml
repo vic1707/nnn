@@ -1,6 +1,6 @@
 [package]
 name = "nnn"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Victor LEFEBVRE <contact@vic1707.xyz>"]
 description = "Generate your newtypes from a single macro."
