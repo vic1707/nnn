@@ -296,6 +296,7 @@ fn expand(
     Ok(quote! {
         #[doc(hidden)]
         #[allow(non_snake_case, reason = "Includes NNNType name which is probably CamelCase.")]
+        #[allow(clippy::module_name_repetitions, reason = "Includes NNNType which is probably the name of the file.")]
         mod #mod_name {
             use super::*;
 
