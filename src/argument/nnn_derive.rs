@@ -16,7 +16,6 @@ pub(crate) enum NNNDerive {
     From,
     TryFrom,
     Borrow,
-    BorrowMut,
     FromStr,
 }
 
@@ -28,7 +27,6 @@ impl Parse for NNNDerive {
             "From" => Ok(Self::From),
             "TryFrom" => Ok(Self::TryFrom),
             "Borrow" => Ok(Self::Borrow),
-            "BorrowMut" => Ok(Self::BorrowMut),
             "FromStr" => Ok(Self::FromStr),
             _ => Err(syn::Error::new_spanned(
                 trait_path,
@@ -73,15 +71,6 @@ impl gen::Gen for NNNDerive {
                     }
                 }
             })],
-            Self::BorrowMut => {
-                vec![gen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::borrow::BorrowMut<#inner_type> for #type_name #ty_generics #where_clause {
-                        fn borrow_mut(&mut self) -> &mut #inner_type {
-                            &mut self.0
-                        }
-                    }
-                })]
-            },
             Self::TryFrom => {
                 vec![gen::Implementation::ItemImpl(parse_quote! {
                     impl #impl_generics ::core::convert::TryFrom<#inner_type> for #type_name #ty_generics #where_clause {
