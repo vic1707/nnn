@@ -22,7 +22,7 @@ jobs:
           toolchain: nightly
 
       - name: Install cargo-doc-rs
-        uses: taiki-e/install-action@v2.47.0
+        uses: taiki-e/install-action@v2.47.7
         with:
           tool: cargo-docs-rs
 
