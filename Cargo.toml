@@ -27,7 +27,7 @@ proc-macro = true
 proc-macro2 = "1.0.92"
 quote = "1.0.38"
 regex = { version = "1.11.1", optional = true }
-syn = { version = "2.0.93", features = ["full", "extra-traits"] }
+syn = { version = "2.0.95", features = ["full", "extra-traits"] }
 
 [features]
 default = []
@@ -36,7 +36,7 @@ regex_validation = ["dep:regex"]
 [dev-dependencies]
 paste = "1.0.15"
 regex = "1.11.1"
-rstest = "0.23.0"
+rstest = "0.24.0"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.134"
 trybuild = "1.0.101"
