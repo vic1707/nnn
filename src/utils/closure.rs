@@ -1,7 +1,6 @@
 /* Dependencies */
 use syn::parse::{Parse, ParseStream};
 
-#[derive(Debug)]
 /// Either
 /// custom = `path::to::fn`
 /// custom = |input: Type| { ...; return .. }

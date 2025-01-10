@@ -3,7 +3,6 @@ use crate::{argument::Arguments, utils::syn_ext::SynDataExt as _};
 /* Dependencies */
 use quote::{format_ident, quote};
 
-#[derive(Debug)]
 pub(crate) struct NNNType {
     inner_field: syn::Field,
     generics: syn::Generics,
@@ -98,7 +97,7 @@ impl TryFrom<(syn::DeriveInput, Arguments)> for NNNType {
             ));
         };
 
-        if inner_field.vis != syn::Visibility::Inherited {
+        if !matches!(inner_field.vis, syn::Visibility::Inherited) {
             return Err(syn::Error::new_spanned(
                 &inner_field.vis,
                 "You can only have a private field here.",

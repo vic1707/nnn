@@ -25,7 +25,7 @@ use syn::{
     token::Comma,
 };
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub(crate) struct Arguments {
     nnn_derives: Vec<NNNDerive>,
     consts: Vec<AssociatedConst>,
@@ -134,7 +134,6 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
     }
 }
 
-#[derive(Debug)]
 pub(crate) enum Argument {
     NNNDerive(Punctuated<NNNDerive, Comma>),
     Cfg(Cfg),

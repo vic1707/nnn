@@ -9,7 +9,6 @@ use syn::{
     parse_quote,
 };
 
-#[derive(Debug)]
 pub(crate) struct AssociatedConst {
     visibility: syn::Visibility,
     name: syn::Ident,

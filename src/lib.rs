@@ -239,7 +239,8 @@ mod gen;
 mod nnn_type;
 mod utils;
 /* Built-in imports */
-use std::collections::HashSet;
+extern crate alloc;
+use alloc::collections::BTreeMap;
 /* Crate imports */
 use argument::{Argument, Arguments};
 use nnn_type::NNNType;
@@ -291,7 +292,10 @@ fn expand(
         exports,
     ) = gen::Implementation::separate_variants(&impls);
 
-    let dedup_err_variants = err_variants.collect::<HashSet<_>>().into_iter();
+    let dedup_err_variants = err_variants
+        .map(|variant| (variant.ident.clone(), variant))
+        .collect::<BTreeMap<_, _>>()
+        .into_values();
 
     Ok(quote! {
         #[doc(hidden)]

@@ -17,7 +17,6 @@ pub(crate) trait Gen {
     ) -> impl Iterator<Item = Implementation>;
 }
 
-#[derive(Debug)]
 pub(crate) enum Implementation {
     /// an impl block
     ItemImpl(syn::ItemImpl),

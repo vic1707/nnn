@@ -4,7 +4,6 @@ use crate::gen;
 /* Dependencies */
 use syn::parse::{Parse, ParseStream};
 
-#[derive(Debug)]
 pub(crate) struct Cfg {
     condition: syn::Expr,
     args: Arguments,

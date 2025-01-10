@@ -10,7 +10,6 @@ use syn::{
     parse_quote,
 };
 
-#[derive(Debug)]
 pub(crate) enum Derive {
     Eq(syn::Path),
     Ord(syn::Path),

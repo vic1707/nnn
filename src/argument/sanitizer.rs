@@ -13,7 +13,6 @@ use syn::{
     token::Comma,
 };
 
-#[derive(Debug)]
 pub(crate) enum Sanitizer {
     // Containers
     Each(Punctuated<Self, Comma>),

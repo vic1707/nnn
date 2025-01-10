@@ -19,6 +19,7 @@ rustflags = [
     "-Aclippy::renamed_function_params", # I do what I want damn
     "-Aclippy::single_call_fn",          # convenience
     "-Aclippy::ref_patterns",
+    "-Aclippy::arbitrary_source_item_ordering", # Too much even for me
     ## Maybe remove one day ##
     "-Aclippy::missing_docs_in_private_items",
 ]

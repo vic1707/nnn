@@ -4,7 +4,6 @@ use syn::{
     parse_quote,
 };
 
-#[derive(Debug)]
 pub(crate) struct TestFn(syn::ItemFn);
 
 impl TestFn {

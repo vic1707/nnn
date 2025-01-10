@@ -1,7 +1,6 @@
 /* Dependencies */
 use syn::parse::{Parse, ParseStream};
 
-#[derive(Debug)]
 pub(crate) enum RegexInput {
     StringLiteral(syn::LitStr),
     Path(syn::Path),

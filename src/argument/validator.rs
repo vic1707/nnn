@@ -16,7 +16,6 @@ use syn::{
     token::Comma,
 };
 
-#[derive(Debug)]
 pub(crate) enum Validator {
     // Containers
     NotEmpty,

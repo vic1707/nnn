@@ -1,7 +1,6 @@
 /* Dependencies */
 use syn::Attribute;
 
-#[derive(Debug)]
 /// Basically [`syn::ImplItem`] without the `Verbatim` variant.
 pub(crate) enum ImplItem {
     Const(syn::ImplItemConst),

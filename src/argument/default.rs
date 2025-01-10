@@ -6,7 +6,6 @@ use crate::gen;
 use quote::quote;
 use syn::parse_quote;
 
-#[derive(Debug)]
 pub(crate) enum Default {
     WithInnerDefault,
     WithValue(syn::Expr),
