@@ -1,4 +1,6 @@
 /* Built-in imports */
+extern crate alloc;
+use alloc::string::ToString as _;
 use core::iter;
 /* Crate imports */
 use crate::{

@@ -233,6 +233,7 @@
 //!
 //! This project is licensed under the **[WTFPL](./LICENSE)**.
 //!
+#![no_std]
 /* Modules */
 mod argument;
 mod gen;

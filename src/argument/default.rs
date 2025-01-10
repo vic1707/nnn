@@ -1,4 +1,6 @@
 /* Built-in imports */
+extern crate alloc;
+use alloc::format;
 use core::iter;
 /* Crate imports */
 use crate::gen;

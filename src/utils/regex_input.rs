@@ -11,11 +11,12 @@ impl Parse for RegexInput {
         let regex = if let Ok(lit_str) = input.parse::<syn::LitStr>() {
             #[cfg(feature = "regex_validation")]
             {
+                extern crate alloc;
                 // Compile time check for literal regex
                 regex::Regex::new(&lit_str.value()).map_err(|err| {
                     syn::Error::new_spanned(
                         &lit_str,
-                        format!("Incorrect Regex {err}"),
+                        ::alloc::format!("Incorrect Regex {err}"),
                     )
                 })?;
             };

@@ -1,3 +1,6 @@
+/* Built-in imports */
+extern crate alloc;
+use alloc::{format, string::String};
 /* Modules */
 pub(crate) mod closure;
 pub(crate) mod regex_input;

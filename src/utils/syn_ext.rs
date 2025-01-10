@@ -1,3 +1,9 @@
+/* Built-in imports */
+extern crate alloc;
+use alloc::{
+    format,
+    string::{String, ToString},
+};
 /* Crate imports */
 use crate::utils;
 /* Dependencies */

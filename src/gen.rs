@@ -1,6 +1,9 @@
 /* Modules */
 mod impl_item;
 mod test_fn;
+/* Built-in imports */
+extern crate alloc;
+use alloc::vec::Vec;
 /* Dependencies */
 use syn::{parse_quote, punctuated::Punctuated, token::Comma};
 /* Re-exports */

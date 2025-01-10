@@ -1,3 +1,6 @@
+/* Built-in imports */
+extern crate alloc;
+use alloc::{format, string::ToString as _, vec, vec::Vec};
 /* Crate imports */
 use crate::{
     gen,

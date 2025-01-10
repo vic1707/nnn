@@ -1,3 +1,6 @@
+/* Built-in imports */
+extern crate alloc;
+use alloc::vec;
 /* Crate imports */
 use crate::{gen, utils::syn_ext::SynPathExt as _};
 /* Dependencies */

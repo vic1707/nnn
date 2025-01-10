@@ -1,3 +1,6 @@
+/* Built-in imports */
+extern crate alloc;
+use alloc::vec::Vec;
 /* Dependencies */
 use syn::Attribute;
 

@@ -7,6 +7,9 @@ mod new_unchecked;
 mod nnn_derive;
 mod sanitizer;
 mod validator;
+/* Built-in imports */
+extern crate alloc;
+use alloc::{string::ToString as _, vec, vec::Vec};
 /* Crate imports */
 use self::{
     associated_const::AssociatedConst, cfg::Cfg, default::Default,
