@@ -24,7 +24,7 @@ rust-version = "1.82.0"
 proc-macro = true
 
 [dependencies]
-proc-macro2 = "1.0.92"
+proc-macro2 = "1.0.93"
 quote = "1.0.38"
 regex = { version = "1.11.1", optional = true }
 syn = { version = "2.0.96", features = ["full"] }
@@ -38,5 +38,5 @@ paste = "1.0.15"
 regex = "1.11.1"
 rstest = "0.24.0"
 serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.135"
-trybuild = "1.0.101"
+serde_json = "1.0.137"
+trybuild = "1.0.103"
