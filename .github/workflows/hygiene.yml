@@ -14,6 +14,8 @@ on:
 env:
   MSRV: 1.82.0
 
+permissions: {}
+
 jobs:
   code-hygiene:
     runs-on: ubuntu-latest

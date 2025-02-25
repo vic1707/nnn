@@ -6,6 +6,8 @@ on:
       - "*"
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   ensure-doc:
     name: Ensure documentation builds
