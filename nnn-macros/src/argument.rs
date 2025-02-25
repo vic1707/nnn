@@ -17,7 +17,7 @@ use self::{
     sanitizer::Sanitizer, validator::Validator,
 };
 use crate::{
-    gen::{self, Gen as _},
+    codegen::{self, Gen as _},
     utils::syn_ext::SynParseBufferExt as _,
 };
 /* Dependencies */
@@ -45,7 +45,7 @@ impl Arguments {
     pub(crate) fn get_impls(
         &self,
         ctx: &crate::Context,
-    ) -> Vec<gen::Implementation> {
+    ) -> Vec<codegen::Implementation> {
         (self.nnn_derives.iter().flat_map(|der| der.gen_impl(ctx)))
             .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_impl(ctx)))
             .chain(self.consts.iter().flat_map(|cst| cst.gen_impl(ctx)))
@@ -58,12 +58,12 @@ impl Arguments {
                 self.transparents
                     .iter()
                     .map(|meta| parse_quote! { #[#meta] })
-                    .map(|attr| gen::Implementation::Attribute(vec![attr])),
+                    .map(|attr| codegen::Implementation::Attribute(vec![attr])),
             )
             .collect()
     }
 
-    pub(crate) fn get_tests(&self, ctx: &crate::Context) -> Vec<gen::TestFn> {
+    pub(crate) fn get_tests(&self, ctx: &crate::Context) -> Vec<codegen::TestFn> {
         (self.nnn_derives.iter().flat_map(|der| der.gen_tests(ctx)))
             .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_tests(ctx)))
             .chain(self.consts.iter().flat_map(|cst| cst.gen_tests(ctx)))

@@ -3,7 +3,7 @@ extern crate alloc;
 use alloc::format;
 use core::iter;
 /* Crate imports */
-use crate::{gen, utils::syn_ext::SynParseBufferExt as _};
+use crate::{codegen, utils::syn_ext::SynParseBufferExt as _};
 /* Dependencies */
 use quote::format_ident;
 use syn::{
@@ -29,16 +29,16 @@ impl Parse for AssociatedConst {
     }
 }
 
-impl gen::Gen for AssociatedConst {
+impl codegen::Gen for AssociatedConst {
     fn gen_impl(
         &self,
         _: &crate::Context,
-    ) -> impl Iterator<Item = gen::Implementation> {
+    ) -> impl Iterator<Item = codegen::Implementation> {
         let visibility = &self.visibility;
         let const_name = &self.name;
         let value = &self.value;
 
-        iter::once(gen::Implementation::ImplItem(gen::ImplItem::Const(
+        iter::once(codegen::Implementation::ImplItem(codegen::ImplItem::Const(
             parse_quote! {
                 #visibility const #const_name: Self = Self(#value);
             },
@@ -48,7 +48,7 @@ impl gen::Gen for AssociatedConst {
     fn gen_tests(
         &self,
         ctx: &crate::Context,
-    ) -> impl Iterator<Item = gen::TestFn> {
+    ) -> impl Iterator<Item = codegen::TestFn> {
         let const_name = &self.name;
         let type_name = ctx.type_name();
 

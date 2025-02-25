@@ -4,7 +4,7 @@ use alloc::string::ToString as _;
 use core::iter;
 /* Crate imports */
 use crate::{
-    gen,
+    codegen,
     utils::{closure::CustomFunction, syn_ext::SynParseBufferExt as _},
 };
 /* Dependencies */
@@ -65,12 +65,12 @@ impl Sanitizer {
     }
 }
 
-impl gen::Gen for Sanitizer {
+impl codegen::Gen for Sanitizer {
     fn gen_impl(
         &self,
         _: &crate::Context,
-    ) -> impl Iterator<Item = gen::Implementation> {
-        iter::once(gen::Implementation::SanitizationStep(self.step()))
+    ) -> impl Iterator<Item = codegen::Implementation> {
+        iter::once(codegen::Implementation::SanitizationStep(self.step()))
     }
 }
 

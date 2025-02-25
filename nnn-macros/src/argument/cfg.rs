@@ -1,6 +1,6 @@
 /* Crate imports */
 use super::{Argument, Arguments};
-use crate::gen;
+use crate::codegen;
 /* Dependencies */
 use syn::parse::{Parse, ParseStream};
 
@@ -23,11 +23,11 @@ impl Parse for Cfg {
     }
 }
 
-impl gen::Gen for Cfg {
+impl codegen::Gen for Cfg {
     fn gen_impl(
         &self,
         ctx: &crate::Context,
-    ) -> impl Iterator<Item = gen::Implementation> {
+    ) -> impl Iterator<Item = codegen::Implementation> {
         self.args.get_impls(ctx).into_iter().map(|mut r#impl| {
             r#impl.make_conditional(&self.condition);
             r#impl
@@ -37,7 +37,7 @@ impl gen::Gen for Cfg {
     fn gen_tests(
         &self,
         ctx: &crate::Context,
-    ) -> impl Iterator<Item = gen::TestFn> {
+    ) -> impl Iterator<Item = codegen::TestFn> {
         self.args.get_tests(ctx).into_iter().map(|mut test| {
             test.make_conditional(&self.condition);
             test

@@ -3,7 +3,7 @@
 /* Modules */
 mod argument;
 mod ctx;
-mod gen;
+mod codegen;
 mod utils;
 /* Built-in imports */
 extern crate alloc;
@@ -54,7 +54,7 @@ fn expand(
         err_display_arm,
         sanitization_steps,
         new_enums,
-    ) = gen::Implementation::separate_variants(&impls);
+    ) = codegen::Implementation::separate_variants(&impls);
 
     let dedup_err_variants = err_variants
         .map(|variant| (variant.ident.clone(), variant))

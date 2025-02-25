@@ -1,19 +1,19 @@
 /* Built-in imports */
 use core::iter;
 /* Crate imports */
-use crate::gen;
+use crate::codegen;
 /* Dependencies */
 use syn::parse_quote;
 
 #[derive(Debug)]
 pub(crate) struct NewUnchecked;
 
-impl gen::Gen for NewUnchecked {
+impl codegen::Gen for NewUnchecked {
     fn gen_impl(
         &self,
         _: &crate::Context,
-    ) -> impl Iterator<Item = gen::Implementation> {
-        iter::once(gen::Implementation::ImplItem(gen::ImplItem::Fn(
+    ) -> impl Iterator<Item = codegen::Implementation> {
+        iter::once(codegen::Implementation::ImplItem(codegen::ImplItem::Fn(
             parse_quote! {
                 #[inline]
                 #[must_use]

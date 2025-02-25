@@ -4,7 +4,7 @@ use alloc::format;
 use core::iter;
 /* Crate imports */
 use super::Validator;
-use crate::{gen, utils::syn_ext::SynPathExt as _};
+use crate::{codegen, utils::syn_ext::SynPathExt as _};
 /* Dependencies */
 use syn::{
     parse::{Parse, ParseStream},
@@ -44,11 +44,11 @@ impl Parse for Derive {
     }
 }
 
-impl gen::Gen for Derive {
+impl codegen::Gen for Derive {
     fn gen_impl(
         &self,
         ctx: &crate::Context,
-    ) -> impl Iterator<Item = gen::Implementation> {
+    ) -> impl Iterator<Item = codegen::Implementation> {
         let is_nan_excluded_for_floats = ctx
             .args()
             .validators
@@ -61,11 +61,11 @@ impl gen::Gen for Derive {
                     let type_name = ctx.type_name();
                     let (impl_generics, ty_generics, where_clause) =
                         ctx.generics().split_for_impl();
-                    gen::Implementation::ItemImpl(parse_quote! {
+                    codegen::Implementation::ItemImpl(parse_quote! {
                         impl #impl_generics #path for #type_name #ty_generics #where_clause {}
                     })
                 } else {
-                    gen::Implementation::Attribute(
+                    codegen::Implementation::Attribute(
                         parse_quote! { #[derive(#path)] },
                     )
                 }
@@ -76,7 +76,7 @@ impl gen::Gen for Derive {
                     let (impl_generics, ty_generics, where_clause) =
                         ctx.generics().split_for_impl();
                     let panic_msg = format!("{type_name}::cmp() panicked, because partial_cmp() returned None. Could it be that you're using unsafe {type_name}::new_unchecked() ?");
-                    gen::Implementation::ItemImpl(parse_quote! {
+                    codegen::Implementation::ItemImpl(parse_quote! {
                         #[expect(clippy::derive_ord_xor_partial_ord, reason = "Manual impl when involving floats.")]
                         impl #impl_generics #path for #type_name #ty_generics #where_clause {
                             fn cmp(&self, other: &Self) -> ::core::cmp::Ordering {
@@ -86,18 +86,18 @@ impl gen::Gen for Derive {
                         }
                     })
                 } else {
-                    gen::Implementation::Attribute(
+                    codegen::Implementation::Attribute(
                         parse_quote! { #[derive(#path)] },
                     )
                 }
             },
             Self::Deserialize(ref path) => {
-                gen::Implementation::Attribute(parse_quote! {
+                codegen::Implementation::Attribute(parse_quote! {
                     #[derive(#path)]
                     #[serde(try_from = "<Self as nnn::NNNewType>::Inner")]
                 })
             },
-            Self::Transparent(ref path) => gen::Implementation::Attribute(
+            Self::Transparent(ref path) => codegen::Implementation::Attribute(
                 parse_quote! { #[derive(#path)] },
             ),
         })
