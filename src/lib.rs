@@ -236,7 +236,7 @@
 #![no_std]
 /* Modules */
 mod argument;
-mod gen;
+mod codegen;
 mod nnn_type;
 mod utils;
 /* Built-in imports */
@@ -291,7 +291,7 @@ fn expand(
         sanitization_steps,
         new_enums,
         exports,
-    ) = gen::Implementation::separate_variants(&impls);
+    ) = codegen::Implementation::separate_variants(&impls);
 
     let dedup_err_variants = err_variants
         .map(|variant| (variant.ident.clone(), variant))

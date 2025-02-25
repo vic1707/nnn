@@ -17,7 +17,7 @@ use self::{
     sanitizer::Sanitizer, validator::Validator,
 };
 use crate::{
-    gen::{self, Gen as _},
+    codegen::{self, Gen as _},
     utils::syn_ext::SynParseBufferExt as _,
 };
 /* Dependencies */
@@ -45,7 +45,7 @@ impl Arguments {
     pub(crate) fn get_impls(
         &self,
         new_type: &crate::NNNType,
-    ) -> Vec<gen::Implementation> {
+    ) -> Vec<codegen::Implementation> {
         (self
             .nnn_derives
             .iter()
@@ -73,7 +73,7 @@ impl Arguments {
             self.transparents
                 .iter()
                 .map(|meta| parse_quote! { #[#meta] })
-                .map(|attr| gen::Implementation::Attribute(vec![attr])),
+                .map(|attr| codegen::Implementation::Attribute(vec![attr])),
         )
         .collect()
     }
@@ -81,7 +81,7 @@ impl Arguments {
     pub(crate) fn get_tests(
         &self,
         new_type: &crate::NNNType,
-    ) -> Vec<gen::TestFn> {
+    ) -> Vec<codegen::TestFn> {
         (self
             .nnn_derives
             .iter()

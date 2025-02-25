@@ -2,7 +2,7 @@
 extern crate alloc;
 use alloc::vec;
 /* Crate imports */
-use crate::{gen, utils::syn_ext::SynPathExt as _};
+use crate::{codegen, utils::syn_ext::SynPathExt as _};
 /* Dependencies */
 use quote::format_ident;
 use syn::{
@@ -39,11 +39,11 @@ impl Parse for NNNDerive {
     }
 }
 
-impl gen::Gen for NNNDerive {
+impl codegen::Gen for NNNDerive {
     fn gen_impl(
         &self,
         nnn_type: &crate::NNNType,
-    ) -> impl Iterator<Item = gen::Implementation> {
+    ) -> impl Iterator<Item = codegen::Implementation> {
         let mod_name = nnn_type.mod_name();
         let type_name = nnn_type.type_name();
         let inner_type = nnn_type.inner_type();
@@ -52,14 +52,14 @@ impl gen::Gen for NNNDerive {
             nnn_type.generics().split_for_impl();
 
         let impls = match *self {
-            Self::Into => vec![gen::Implementation::ItemImpl(parse_quote! {
+            Self::Into => vec![codegen::Implementation::ItemImpl(parse_quote! {
                 impl #impl_generics ::core::convert::Into<#inner_type> for #type_name #ty_generics #where_clause {
                     fn into(self) -> #inner_type {
                         self.0
                     }
                 }
             })],
-            Self::From => vec![gen::Implementation::ItemImpl(parse_quote! {
+            Self::From => vec![codegen::Implementation::ItemImpl(parse_quote! {
                 impl #impl_generics ::core::convert::From<#type_name #ty_generics> for #inner_type #where_clause {
                     fn from(value: #type_name #ty_generics) -> #inner_type {
                         value.0
@@ -67,7 +67,7 @@ impl gen::Gen for NNNDerive {
                 }
             })],
             // TODO: String can do str, Vec can do slices?
-            Self::Borrow => vec![gen::Implementation::ItemImpl(parse_quote! {
+            Self::Borrow => vec![codegen::Implementation::ItemImpl(parse_quote! {
                 impl #impl_generics ::core::borrow::Borrow<#inner_type> for #type_name #ty_generics #where_clause {
                     fn borrow(&self) -> &#inner_type {
                         &self.0
@@ -75,7 +75,7 @@ impl gen::Gen for NNNDerive {
                 }
             })],
             Self::TryFrom => {
-                vec![gen::Implementation::ItemImpl(parse_quote! {
+                vec![codegen::Implementation::ItemImpl(parse_quote! {
                     impl #impl_generics ::core::convert::TryFrom<#inner_type> for #type_name #ty_generics #where_clause {
                         type Error = #error_name;
                         fn try_from(value: #inner_type) -> Result<Self, Self::Error> {
@@ -87,7 +87,7 @@ impl gen::Gen for NNNDerive {
             Self::FromStr => {
                 let parse_err_name = format_ident!("{type_name}ParseError");
                 vec![
-                    gen::Implementation::Enum(parse_quote! {
+                    codegen::Implementation::Enum(parse_quote! {
                         #[derive(Debug, Clone, PartialEq, Eq)]
                         #[non_exhaustive]
                         pub enum #impl_generics #parse_err_name #where_clause {
@@ -95,10 +95,10 @@ impl gen::Gen for NNNDerive {
                             Validation(#error_name),
                         }
                     }),
-                    gen::Implementation::Export(
+                    codegen::Implementation::Export(
                         parse_quote! { use #mod_name::#parse_err_name; },
                     ),
-                    gen::Implementation::ItemImpl(parse_quote! {
+                    codegen::Implementation::ItemImpl(parse_quote! {
                         impl #impl_generics ::core::fmt::Display for #parse_err_name #ty_generics #where_clause {
                             fn fmt(&self, fmt: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                                 match *self {
@@ -112,7 +112,7 @@ impl gen::Gen for NNNDerive {
                             }
                         }
                     }),
-                    gen::Implementation::ItemImpl(parse_quote! {
+                    codegen::Implementation::ItemImpl(parse_quote! {
                         impl #impl_generics ::core::str::FromStr for #type_name #ty_generics #where_clause {
                             type Err = #parse_err_name;
 

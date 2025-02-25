@@ -3,7 +3,7 @@ extern crate alloc;
 use alloc::{format, string::ToString as _, vec, vec::Vec};
 /* Crate imports */
 use crate::{
-    gen,
+    codegen,
     utils::{
         closure::CustomFunction,
         regex_input::RegexInput,
@@ -56,15 +56,15 @@ pub(crate) enum Validator {
     },
 }
 
-impl gen::Gen for Validator {
+impl codegen::Gen for Validator {
     fn gen_impl(
         &self,
         new_type: &crate::NNNType,
-    ) -> impl Iterator<Item = gen::Implementation> {
+    ) -> impl Iterator<Item = codegen::Implementation> {
         [
-            gen::Implementation::ErrorVariant(self.variant()),
-            gen::Implementation::ErrorDisplayArm(self.display_arm(new_type)),
-            gen::Implementation::ValidityCheck(self.check(new_type)),
+            codegen::Implementation::ErrorVariant(self.variant()),
+            codegen::Implementation::ErrorDisplayArm(self.display_arm(new_type)),
+            codegen::Implementation::ValidityCheck(self.check(new_type)),
         ]
         .into_iter()
     }
@@ -72,7 +72,7 @@ impl gen::Gen for Validator {
     fn gen_tests(
         &self,
         _: &crate::NNNType,
-    ) -> impl Iterator<Item = gen::TestFn> {
+    ) -> impl Iterator<Item = codegen::TestFn> {
         if let Self::Regex(ref regex) = *self {
             let check: syn::Stmt = match *regex {
                 RegexInput::Path(ref path) => {

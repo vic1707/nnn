@@ -3,7 +3,7 @@ extern crate alloc;
 use alloc::format;
 use core::iter;
 /* Crate imports */
-use crate::gen;
+use crate::codegen;
 /* Dependencies */
 use quote::quote;
 use syn::parse_quote;
@@ -13,11 +13,11 @@ pub(crate) enum Default {
     WithValue(syn::Expr),
 }
 
-impl gen::Gen for Default {
+impl codegen::Gen for Default {
     fn gen_impl(
         &self,
         new_type: &crate::NNNType,
-    ) -> impl Iterator<Item = gen::Implementation> {
+    ) -> impl Iterator<Item = codegen::Implementation> {
         let inner_type = new_type.inner_type();
         let type_name = new_type.type_name();
         let (impl_generics, ty_generics, where_clause) =
@@ -28,7 +28,7 @@ impl gen::Gen for Default {
             Self::WithValue(ref expr) => quote! { #expr },
         };
 
-        iter::once(gen::Implementation::ItemImpl(parse_quote! {
+        iter::once(codegen::Implementation::ItemImpl(parse_quote! {
             impl #impl_generics ::core::default::Default for #type_name #ty_generics #where_clause {
                 fn default() -> Self {
                     #[doc = "Is checked by automatically generated test."]
@@ -41,7 +41,7 @@ impl gen::Gen for Default {
     fn gen_tests(
         &self,
         new_type: &crate::NNNType,
-    ) -> impl Iterator<Item = gen::TestFn> {
+    ) -> impl Iterator<Item = codegen::TestFn> {
         let type_name = new_type.type_name();
         let err_msg = format!("Type `{type_name}` has invalid default value.",);
 
