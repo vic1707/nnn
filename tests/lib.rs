@@ -30,6 +30,7 @@ mod validators {
 }
 #[rustfmt::skip] // wants to reorder modules
 mod derives {
+    mod from_str;
     mod serde;
 }
 
