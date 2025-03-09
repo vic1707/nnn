@@ -88,52 +88,63 @@ impl codegen::Gen for NNNDerive {
 
         let impls = match *self {
             Self::Into(ref targets) => {
-                targets.clone().unwrap_or(self.default_target(ctx))
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
                     .args
                     .iter()
-                    .map(|target|
+                    .map(|target| {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::convert::Into<#target> for #type_name #ty_generics #where_clause {
                                 fn into(self) -> #target {
                                     self.0.into()
                                 }
                             }
-                        }))
+                        })
+                    })
                     .collect()
             },
             Self::From(ref targets) => {
-                targets.clone().unwrap_or(self.default_target(ctx))
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
                     .args
                     .iter()
-                    .map(|target|
+                    .map(|target| {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::convert::From<#type_name #ty_generics> for #target #where_clause {
                                 fn from(value: #type_name #ty_generics) -> #target {
                                     value.0.into()
                                 }
                             }
-                        }))
+                        })
+                    })
                     .collect()
             },
             Self::Borrow(ref targets) => {
-                targets.clone().unwrap_or(self.default_target(ctx))
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
                     .args
                     .iter()
-                    .map(|target|
+                    .map(|target| {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::borrow::Borrow<#target> for #type_name #ty_generics #where_clause {
                                 fn borrow(&self) -> &#target {
                                     &self.0
                                 }
                             }
-                        }))
-                .collect()
+                        })
+                    })
+                    .collect()
             },
             Self::TryFrom(ref targets) => {
-                targets.clone().unwrap_or(self.default_target(ctx))
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
                     .args
                     .iter()
-                    .map(|target|
+                    .map(|target| {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::convert::TryFrom<#target> for #type_name #ty_generics #where_clause {
                                 type Error = <Self as nnn::NNNewType>::Error;
@@ -141,8 +152,9 @@ impl codegen::Gen for NNNDerive {
                                     <Self as nnn::NNNewType>::try_new(value.into())
                                 }
                             }
-                        }))
-                .collect()
+                        })
+                    })
+                    .collect()
             },
             Self::FromStr => {
                 let parse_err_name = format_ident!("{type_name}ParseError");
@@ -223,20 +235,18 @@ fn extract_generics_targets(
     trait_path: &syn::Path,
 ) -> syn::Result<Option<syn::AngleBracketedGenericArguments>> {
     match trait_path.trait_segment().cloned()?.arguments {
-        // if no arguments were given to the trait e.g: Into instead of Into<Target>
-        // we insert the new-type's inner type as the target
+        // If no arguments were given to the trait, e.g., "Into" instead of "Into<Target>",
+        // we insert the new-type's inner type as the target.
         syn::PathArguments::None => Ok(None),
         syn::PathArguments::AngleBracketed(args) if args.args.is_empty() => Err(syn::Error::new_spanned(
             args,
             "Please provide generics arguments, or omit the '<>' for the default derive.",
         )),
         syn::PathArguments::AngleBracketed(args) => Ok(Some(args)),
-        syn::PathArguments::Parenthesized(args) => {
-            Err(syn::Error::new_spanned(
-                args,
-                "Trait aren't allowed to take parenthesized generics arguments.",
-            ))
-        },
+        syn::PathArguments::Parenthesized(args) => Err(syn::Error::new_spanned(
+            args,
+            "Trait isn't allowed to take parenthesized generics arguments.",
+        )),
     }
 }
 
