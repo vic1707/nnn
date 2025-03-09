@@ -16,7 +16,7 @@ use syn::{
 /// Providing them so users aren't required to install other crates for trivial derives.
 pub(crate) enum NNNDerive {
     Into(Option<syn::AngleBracketedGenericArguments>),
-    From,
+    From(Option<syn::AngleBracketedGenericArguments>),
     TryFrom,
     Borrow,
     FromStr,
@@ -26,10 +26,14 @@ pub(crate) enum NNNDerive {
 impl NNNDerive {
     fn default_target(
         &self,
-        _: &crate::Context,
+        ctx: &crate::Context,
     ) -> syn::AngleBracketedGenericArguments {
+        let type_name = ctx.type_name();
         match *self {
             Self::Into(_) => parse_quote! { <<Self as nnn::NNNewType>::Inner> },
+            Self::From(_) => {
+                parse_quote! { <<#type_name as nnn::NNNewType>::Inner> }
+            },
             _ => unreachable!(),
         }
     }
@@ -44,8 +48,8 @@ impl Parse for NNNDerive {
                 Ok(Self::Into(targets))
             },
             "From" => {
-                assert_no_generics_params(&trait_path)?;
-                Ok(Self::From)
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::From(targets))
             },
             "TryFrom" => {
                 assert_no_generics_params(&trait_path)?;
@@ -95,14 +99,19 @@ impl codegen::Gen for NNNDerive {
                         }))
                     .collect()
             },
-            Self::From => {
-                vec![codegen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::convert::From<#type_name #ty_generics> for <#type_name as nnn::NNNewType>::Inner #where_clause {
-                        fn from(value: #type_name #ty_generics) -> Self {
-                            value.0
-                        }
-                    }
-                })]
+            Self::From(ref targets) => {
+                targets.clone().unwrap_or(self.default_target(ctx))
+                    .args
+                    .iter()
+                    .map(|target|
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::convert::From<#type_name #ty_generics> for #target #where_clause {
+                                fn from(value: #type_name #ty_generics) -> #target {
+                                    value.0.into()
+                                }
+                            }
+                        }))
+                    .collect()
             },
             // TODO: String can do str, Vec can do slices?
             Self::Borrow => {
