@@ -18,7 +18,7 @@ pub(crate) enum NNNDerive {
     Into(Option<syn::AngleBracketedGenericArguments>),
     From(Option<syn::AngleBracketedGenericArguments>),
     TryFrom(Option<syn::AngleBracketedGenericArguments>),
-    Borrow,
+    Borrow(Option<syn::AngleBracketedGenericArguments>),
     FromStr,
     IntoIterator,
 }
@@ -30,7 +30,7 @@ impl NNNDerive {
     ) -> syn::AngleBracketedGenericArguments {
         let type_name = ctx.type_name();
         match *self {
-            Self::Into(_) | Self::TryFrom(_) => {
+            Self::Into(_) | Self::TryFrom(_) | Self::Borrow(_) => {
                 parse_quote! { <<Self as nnn::NNNewType>::Inner> }
             },
             Self::From(_) => {
@@ -58,8 +58,8 @@ impl Parse for NNNDerive {
                 Ok(Self::TryFrom(targets))
             },
             "Borrow" => {
-                assert_no_generics_params(&trait_path)?;
-                Ok(Self::Borrow)
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::Borrow(targets))
             },
             "FromStr" => {
                 assert_no_generics_params(&trait_path)?;
@@ -115,15 +115,19 @@ impl codegen::Gen for NNNDerive {
                         }))
                     .collect()
             },
-            // TODO: String can do str, Vec can do slices?
-            Self::Borrow => {
-                vec![codegen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::borrow::Borrow<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
-                        fn borrow(&self) -> &<Self as nnn::NNNewType>::Inner {
-                            &self.0
-                        }
-                    }
-                })]
+            Self::Borrow(ref targets) => {
+                targets.clone().unwrap_or(self.default_target(ctx))
+                    .args
+                    .iter()
+                    .map(|target|
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::borrow::Borrow<#target> for #type_name #ty_generics #where_clause {
+                                fn borrow(&self) -> &#target {
+                                    &self.0
+                                }
+                            }
+                        }))
+                .collect()
             },
             Self::TryFrom(ref targets) => {
                 targets.clone().unwrap_or(self.default_target(ctx))
