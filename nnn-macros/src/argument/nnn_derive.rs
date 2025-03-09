@@ -17,7 +17,7 @@ use syn::{
 pub(crate) enum NNNDerive {
     Into(Option<syn::AngleBracketedGenericArguments>),
     From(Option<syn::AngleBracketedGenericArguments>),
-    TryFrom,
+    TryFrom(Option<syn::AngleBracketedGenericArguments>),
     Borrow,
     FromStr,
     IntoIterator,
@@ -30,7 +30,9 @@ impl NNNDerive {
     ) -> syn::AngleBracketedGenericArguments {
         let type_name = ctx.type_name();
         match *self {
-            Self::Into(_) => parse_quote! { <<Self as nnn::NNNewType>::Inner> },
+            Self::Into(_) | Self::TryFrom(_) => {
+                parse_quote! { <<Self as nnn::NNNewType>::Inner> }
+            },
             Self::From(_) => {
                 parse_quote! { <<#type_name as nnn::NNNewType>::Inner> }
             },
@@ -52,8 +54,8 @@ impl Parse for NNNDerive {
                 Ok(Self::From(targets))
             },
             "TryFrom" => {
-                assert_no_generics_params(&trait_path)?;
-                Ok(Self::TryFrom)
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::TryFrom(targets))
             },
             "Borrow" => {
                 assert_no_generics_params(&trait_path)?;
@@ -123,15 +125,20 @@ impl codegen::Gen for NNNDerive {
                     }
                 })]
             },
-            Self::TryFrom => {
-                vec![codegen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::convert::TryFrom<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
-                        type Error = <Self as nnn::NNNewType>::Error;
-                        fn try_from(value: <Self as nnn::NNNewType>::Inner) -> Result<Self, Self::Error> {
-                            <Self as nnn::NNNewType>::try_new(value)
-                        }
-                    }
-                })]
+            Self::TryFrom(ref targets) => {
+                targets.clone().unwrap_or(self.default_target(ctx))
+                    .args
+                    .iter()
+                    .map(|target|
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::convert::TryFrom<#target> for #type_name #ty_generics #where_clause {
+                                type Error = <Self as nnn::NNNewType>::Error;
+                                fn try_from(value: #target) -> Result<Self, Self::Error> {
+                                    <Self as nnn::NNNewType>::try_new(value.into())
+                                }
+                            }
+                        }))
+                .collect()
             },
             Self::FromStr => {
                 let parse_err_name = format_ident!("{type_name}ParseError");

@@ -1,5 +1,5 @@
 error: Please provide generics arguments, or omit the '<>' for the default derive.
  --> tests/ui/fail/custom_derive_empty_generics_parameters.rs:3:22
   |
-3 | #[nnn(nnn_derive(Into<>, From<>))]
+3 | #[nnn(nnn_derive(Into<>, From<>, TryFrom<>))]
   |                      ^^
