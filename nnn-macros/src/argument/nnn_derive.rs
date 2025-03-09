@@ -20,6 +20,7 @@ pub(crate) enum NNNDerive {
     TryFrom,
     Borrow,
     FromStr,
+    IntoIterator,
 }
 
 impl Parse for NNNDerive {
@@ -31,6 +32,7 @@ impl Parse for NNNDerive {
             "TryFrom" => Ok(Self::TryFrom),
             "Borrow" => Ok(Self::Borrow),
             "FromStr" => Ok(Self::FromStr),
+            "IntoIterator" => Ok(Self::IntoIterator),
             _ => Err(syn::Error::new_spanned(
                 trait_path,
                 "Unknown `nnn_derive`.",
@@ -114,6 +116,37 @@ impl gen::Gen for NNNDerive {
                                 Self::try_new(
                                     input.parse().map_err(#parse_err_name::InnerParse)?
                                 ).map_err(#parse_err_name::Validation)
+                            }
+                        }
+                    }),
+                ]
+            },
+            Self::IntoIterator => {
+                let lifetime: syn::GenericParam = parse_quote!{ '__iter_ref };
+                let generics_with_lifetime = {
+                    let mut generics = ctx.generics().clone();
+                    generics.params.push(lifetime.clone());
+                    generics
+                };
+
+                vec![
+                    gen::Implementation::ItemImpl(parse_quote! {
+                        impl #impl_generics ::core::iter::IntoIterator for #type_name #ty_generics #where_clause {
+                            type Item = <<Self as nnn::NNNewType>::Inner as ::core::iter::IntoIterator>::Item;
+                            type IntoIter = <<Self as nnn::NNNewType>::Inner as ::core::iter::IntoIterator>::IntoIter;
+
+                            fn into_iter(self) -> Self::IntoIter {
+                                self.0.into_iter()
+                            }
+                        }
+                    }),
+                    gen::Implementation::ItemImpl(parse_quote! {
+                        impl #generics_with_lifetime ::core::iter::IntoIterator for &#lifetime #type_name #ty_generics #where_clause {
+                            type Item = <&#lifetime <#type_name #ty_generics as nnn::NNNewType>::Inner as ::core::iter::IntoIterator>::Item;
+                            type IntoIter = <&#lifetime <#type_name #ty_generics as nnn::NNNewType>::Inner as ::core::iter::IntoIterator>::IntoIter;
+
+                            fn into_iter(self) -> Self::IntoIter {
+                                self.0.iter()
                             }
                         }
                     }),
