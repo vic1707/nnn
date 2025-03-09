@@ -20,6 +20,7 @@ pub(crate) enum NNNDerive {
     Borrow(Option<syn::AngleBracketedGenericArguments>),
     FromStr,
     IntoIterator,
+    AsRef(Option<syn::AngleBracketedGenericArguments>),
 }
 
 impl NNNDerive {
@@ -29,7 +30,10 @@ impl NNNDerive {
     ) -> syn::AngleBracketedGenericArguments {
         let type_name = ctx.type_name();
         match *self {
-            Self::Into(_) | Self::TryFrom(_) | Self::Borrow(_) => {
+            Self::Into(_)
+            | Self::TryFrom(_)
+            | Self::Borrow(_)
+            | Self::AsRef(_) => {
                 parse_quote! { <<Self as nnn::NNNewType>::Inner> }
             },
             Self::From(_) => {
@@ -67,6 +71,10 @@ impl Parse for NNNDerive {
             "IntoIterator" => {
                 assert_no_generics_params(&trait_path)?;
                 Ok(Self::IntoIterator)
+            },
+            "AsRef" => {
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::AsRef(targets))
             },
             _ => Err(syn::Error::new_spanned(
                 trait_path,
@@ -247,6 +255,27 @@ impl codegen::Gen for NNNDerive {
                         }
                     }),
                 ]
+            },
+            Self::AsRef(ref targets) => {
+                targets.clone().unwrap_or(self.default_target(ctx))
+                    .args
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
+                    .map(|target| {
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::convert::AsRef<#target> for #type_name #ty_generics #where_clause {
+                                fn as_ref(&self) -> &#target {
+                                    &self.0
+                                }
+                            }
+                        })
+                    })
+                    .collect()
             },
         };
 

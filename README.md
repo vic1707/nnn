@@ -115,9 +115,9 @@ Passed transparently, with `nnn` injecting `#[serde(try_from = "<inner>")]` to e
 
 `nnn` provides custom implementations of some common derives to implement `nnn`'s guarantees.
 
-1. **`Into`/`From`/`Borrow`**
+1. **`Into`/`From`/`Borrow`/`AsRef`**
 
-These derives their respective traits to convert from a new\*type to its inner type.
+These derives their respective traits to convert from a new-type to its inner type.
 These derives can take generic inputs as parameters, `#[nnn_derive(Into<i8, i16, 132>)]` will generate derives for `Into<i8>`/`Into<i16>`/`Into<i32>` for the new_type. `#[nnn_derive(Into)]` still defaults to deriving `Into<inner_type>`.
 
 _Note:_ `_`as a generic parameter will be translated to`<inner_type>`, e.g:
