@@ -2,8 +2,8 @@
 #![no_std]
 /* Modules */
 mod argument;
-mod ctx;
 mod codegen;
+mod ctx;
 mod utils;
 /* Built-in imports */
 extern crate alloc;

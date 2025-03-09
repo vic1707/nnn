@@ -63,7 +63,10 @@ impl Arguments {
             .collect()
     }
 
-    pub(crate) fn get_tests(&self, ctx: &crate::Context) -> Vec<codegen::TestFn> {
+    pub(crate) fn get_tests(
+        &self,
+        ctx: &crate::Context,
+    ) -> Vec<codegen::TestFn> {
         (self.nnn_derives.iter().flat_map(|der| der.gen_tests(ctx)))
             .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_tests(ctx)))
             .chain(self.consts.iter().flat_map(|cst| cst.gen_tests(ctx)))

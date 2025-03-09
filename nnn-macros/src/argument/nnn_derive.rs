@@ -51,28 +51,34 @@ impl codegen::Gen for NNNDerive {
             ctx.generics().split_for_impl();
 
         let impls = match *self {
-            Self::Into => vec![codegen::Implementation::ItemImpl(parse_quote! {
-                impl #impl_generics ::core::convert::Into<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
-                    fn into(self) -> <Self as nnn::NNNewType>::Inner {
-                        self.0
+            Self::Into => {
+                vec![codegen::Implementation::ItemImpl(parse_quote! {
+                    impl #impl_generics ::core::convert::Into<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
+                        fn into(self) -> <Self as nnn::NNNewType>::Inner {
+                            self.0
+                        }
                     }
-                }
-            })],
-            Self::From => vec![codegen::Implementation::ItemImpl(parse_quote! {
-                impl #impl_generics ::core::convert::From<#type_name #ty_generics> for <Self as nnn::NNNewType>::Inner #where_clause {
-                    fn from(value: #type_name #ty_generics) -> <Self as nnn::NNNewType>::Inner {
-                        value.0
+                })]
+            },
+            Self::From => {
+                vec![codegen::Implementation::ItemImpl(parse_quote! {
+                    impl #impl_generics ::core::convert::From<#type_name #ty_generics> for <Self as nnn::NNNewType>::Inner #where_clause {
+                        fn from(value: #type_name #ty_generics) -> <Self as nnn::NNNewType>::Inner {
+                            value.0
+                        }
                     }
-                }
-            })],
+                })]
+            },
             // TODO: String can do str, Vec can do slices?
-            Self::Borrow => vec![codegen::Implementation::ItemImpl(parse_quote! {
-                impl #impl_generics ::core::borrow::Borrow<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
-                    fn borrow(&self) -> &<Self as nnn::NNNewType>::Inner {
-                        &self.0
+            Self::Borrow => {
+                vec![codegen::Implementation::ItemImpl(parse_quote! {
+                    impl #impl_generics ::core::borrow::Borrow<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
+                        fn borrow(&self) -> &<Self as nnn::NNNewType>::Inner {
+                            &self.0
+                        }
                     }
-                }
-            })],
+                })]
+            },
             Self::TryFrom => {
                 vec![codegen::Implementation::ItemImpl(parse_quote! {
                     impl #impl_generics ::core::convert::TryFrom<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
@@ -122,7 +128,7 @@ impl codegen::Gen for NNNDerive {
                 ]
             },
             Self::IntoIterator => {
-                let lifetime: syn::GenericParam = parse_quote!{ '__iter_ref };
+                let lifetime: syn::GenericParam = parse_quote! { '__iter_ref };
                 let generics_with_lifetime = {
                     let mut generics = ctx.generics().clone();
                     generics.params.push(lifetime.clone());
