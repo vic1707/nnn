@@ -32,7 +32,7 @@ impl Parse for AssociatedConst {
 impl gen::Gen for AssociatedConst {
     fn gen_impl(
         &self,
-        _: &crate::NNNType,
+        _: &crate::Context,
     ) -> impl Iterator<Item = gen::Implementation> {
         let visibility = &self.visibility;
         let const_name = &self.name;
@@ -47,10 +47,10 @@ impl gen::Gen for AssociatedConst {
 
     fn gen_tests(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = gen::TestFn> {
         let const_name = &self.name;
-        let type_name = new_type.type_name();
+        let type_name = ctx.type_name();
 
         let err_msg = format!(
             "Type `{type_name}` has invalid value for associated const `{const_name}`.",

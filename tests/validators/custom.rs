@@ -1,7 +1,7 @@
 /* Built-in imports */
 use core::{num, str::FromStr as _};
 /* Crate imports */
-use nnn::nnn;
+use nnn::{nnn, NNNewType as _};
 /* Dependencies */
 use rstest::rstest;
 

@@ -1,28 +1,13 @@
 /* Crate imports */
 use crate::{argument::Arguments, utils::syn_ext::SynDataExt as _};
-/* Dependencies */
-use quote::{format_ident, quote};
 
-pub(crate) struct NNNType {
-    inner_field: syn::Field,
+pub(crate) struct Context {
     generics: syn::Generics,
     type_name: syn::Ident,
     arguments: Arguments,
 }
 
-impl NNNType {
-    pub(crate) fn error_name(&self) -> syn::Ident {
-        format_ident!("{}Error", self.type_name())
-    }
-
-    pub(crate) fn mod_name(&self) -> syn::Ident {
-        format_ident!("__private_{}", self.type_name())
-    }
-
-    pub(crate) const fn inner_type(&self) -> &syn::Type {
-        &self.inner_field.ty
-    }
-
+impl Context {
     pub(crate) const fn generics(&self) -> &syn::Generics {
         &self.generics
     }
@@ -36,23 +21,7 @@ impl NNNType {
     }
 }
 
-impl quote::ToTokens for NNNType {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let Self {
-            ref generics,
-            ref inner_field,
-            ref type_name,
-            ..
-        } = *self;
-        let where_clause = &generics.where_clause;
-
-        tokens.extend(quote! {
-            pub struct #type_name #generics (#inner_field) #where_clause;
-        });
-    }
-}
-
-impl TryFrom<(syn::DeriveInput, Arguments)> for NNNType {
+impl TryFrom<(syn::DeriveInput, Arguments)> for Context {
     type Error = syn::Error;
 
     fn try_from(
@@ -114,7 +83,6 @@ impl TryFrom<(syn::DeriveInput, Arguments)> for NNNType {
         Ok(Self {
             generics,
             type_name,
-            inner_field: inner_field.clone(),
             arguments,
         })
     }

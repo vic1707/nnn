@@ -1,5 +1,5 @@
 [package]
-name = "nnn"
+name = "nnn-macros"
 version = "1.0.0"
 edition = "2021"
 authors = ["Victor LEFEBVRE <contact@vic1707.xyz>"]
@@ -13,21 +13,15 @@ categories = ["data-structures", "rust-patterns"]
 keywords = ["newtype", "validation", "sanitization", "derive", "invariant"]
 rust-version = "1.82.0"
 
-[workspace]
-resolver = "2"
-members = ["nnn-macros"]
-
-[dependencies]
-nnn-macros = { version = "1.0.0", path = "./nnn-macros" }
+[lib]
+proc-macro = true
 
 [features]
 default = []
-regex_validation = ["nnn-macros/regex_validation"]
+regex_validation = ["dep:regex"]
 
-[dev-dependencies]
-paste = "1.0.15"
-regex = "1.11.1"
-rstest = "0.24.0"
-serde = { version = "1.0.218", features = ["derive"] }
-serde_json = "1.0.139"
-trybuild = "1.0.103"
+[dependencies]
+proc-macro2 = "1.0.93"
+quote = "1.0.38"
+regex = { version = "1.11.1", optional = true }
+syn = { version = "2.0.98", features = ["full"] }

@@ -10,13 +10,13 @@ use syn::{parse_quote, punctuated::Punctuated, token::Comma};
 pub(crate) use self::{impl_item::ImplItem, test_fn::TestFn};
 
 pub(crate) trait Gen {
-    fn gen_tests(&self, _: &crate::NNNType) -> impl Iterator<Item = TestFn> {
+    fn gen_tests(&self, _: &crate::Context) -> impl Iterator<Item = TestFn> {
         [].into_iter()
     }
 
     fn gen_impl(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = Implementation>;
 }
 
@@ -35,7 +35,6 @@ pub(crate) enum Implementation {
     SanitizationStep(syn::Block),
 
     Enum(syn::ItemEnum),
-    Export(syn::ItemUse),
 }
 
 impl Implementation {
@@ -69,7 +68,6 @@ impl Implementation {
                 arms.iter_mut()
                     .for_each(|arm| arm.attrs.push(cfg_attr.clone()));
             },
-            Self::Export(ref mut r#use) => r#use.attrs.push(cfg_attr),
             Self::Enum(ref mut item) => item.attrs.push(cfg_attr),
         }
     }
@@ -86,7 +84,6 @@ impl Implementation {
         impl Iterator<Item = &syn::Arm>,
         impl Iterator<Item = &syn::Block>,
         impl Iterator<Item = &syn::ItemEnum>,
-        impl Iterator<Item = &syn::ItemUse>,
     ) {
         let impl_blocks = impls.iter().filter_map(|item| match *item {
             Self::ItemImpl(ref el) => Some(el),
@@ -132,10 +129,6 @@ impl Implementation {
             Self::Enum(ref el) => Some(el),
             _ => None,
         });
-        let exports = impls.iter().filter_map(|item| match *item {
-            Self::Export(ref el) => Some(el),
-            _ => None,
-        });
 
         (
             impl_blocks,
@@ -146,7 +139,6 @@ impl Implementation {
             err_display_arm,
             sanitization_steps,
             enums,
-            exports,
         )
     }
 }

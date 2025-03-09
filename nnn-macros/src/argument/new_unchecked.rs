@@ -11,15 +11,13 @@ pub(crate) struct NewUnchecked;
 impl gen::Gen for NewUnchecked {
     fn gen_impl(
         &self,
-        new_type: &crate::NNNType,
+        _: &crate::Context,
     ) -> impl Iterator<Item = gen::Implementation> {
-        let inner_type = new_type.inner_type();
-
         iter::once(gen::Implementation::ImplItem(gen::ImplItem::Fn(
             parse_quote! {
                 #[inline]
                 #[must_use]
-                pub const unsafe fn new_unchecked(inner: #inner_type) -> Self {
+                pub const unsafe fn new_unchecked(inner: <Self as nnn::NNNewType>::Inner) -> Self {
                     Self(inner)
                 }
             },

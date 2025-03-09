@@ -59,19 +59,19 @@ pub(crate) enum Validator {
 impl gen::Gen for Validator {
     fn gen_impl(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = gen::Implementation> {
         [
             gen::Implementation::ErrorVariant(self.variant()),
-            gen::Implementation::ErrorDisplayArm(self.display_arm(new_type)),
-            gen::Implementation::ValidityCheck(self.check(new_type)),
+            gen::Implementation::ErrorDisplayArm(self.display_arm(ctx)),
+            gen::Implementation::ValidityCheck(self.check(ctx)),
         ]
         .into_iter()
     }
 
     fn gen_tests(
         &self,
-        _: &crate::NNNType,
+        _: &crate::Context,
     ) -> impl Iterator<Item = gen::TestFn> {
         if let Self::Regex(ref regex) = *self {
             let check: syn::Stmt = match *regex {
@@ -151,16 +151,14 @@ impl Validator {
         }
     }
 
-    pub(crate) fn check(&self, new_type: &crate::NNNType) -> syn::Block {
-        let error_type = new_type.error_name();
+    pub(crate) fn check(&self, _ctx: &crate::Context) -> syn::Block {
         match *self {
             // Containers
             Self::NotEmpty => {
-                parse_quote! {{ if value.is_empty() { return Err(#error_type::NotEmpty) } }}
+                parse_quote! {{ if value.is_empty() { return Err(<Self as nnn::NNNewType>::Error::NotEmpty) } }}
             },
             Self::Each(ref checks) => {
-                let inner_branches =
-                    checks.iter().map(|val| val.check(new_type));
+                let inner_branches = checks.iter().map(|val| val.check(_ctx));
                 parse_quote! {{
                     // TODO: is .cloned() really the solution ?
                     value.iter().cloned().enumerate().try_for_each(
@@ -170,60 +168,60 @@ impl Validator {
                                 #(#inner_branches;)*
                                 Ok(())
                             };
-                            check().map_err(|err| #error_type::Each(idx, Box::new(err)))
+                            check().map_err(|err| <Self as nnn::NNNewType>::Error::Each(idx, Box::new(err)))
                         }
                     )?
                 }}
             },
             Self::MinLength(ref val) => {
-                parse_quote! {{ if !(value.len() > #val) { return Err(#error_type::MinLength) } }}
+                parse_quote! {{ if !(value.len() > #val) { return Err(<Self as nnn::NNNewType>::Error::MinLength) } }}
             },
             Self::MinLengthOrEq(ref val) => {
-                parse_quote! {{ if !(value.len() >= #val) { return Err(#error_type::MinLengthOrEq) } }}
+                parse_quote! {{ if !(value.len() >= #val) { return Err(<Self as nnn::NNNewType>::Error::MinLengthOrEq) } }}
             },
             Self::Length(ref val) => {
-                parse_quote! {{ if value.len() != #val { return Err(#error_type::Length) } }}
+                parse_quote! {{ if value.len() != #val { return Err(<Self as nnn::NNNewType>::Error::Length) } }}
             },
             Self::MaxLength(ref val) => {
-                parse_quote! {{ if !(value.len() < #val) { return Err(#error_type::MaxLength) } }}
+                parse_quote! {{ if !(value.len() < #val) { return Err(<Self as nnn::NNNewType>::Error::MaxLength) } }}
             },
             Self::MaxLengthOrEq(ref val) => {
-                parse_quote! {{ if !(value.len() <= #val) { return Err(#error_type::MaxLengthOrEq) } }}
+                parse_quote! {{ if !(value.len() <= #val) { return Err(<Self as nnn::NNNewType>::Error::MaxLengthOrEq) } }}
             },
             // Numerics
             Self::Min(ref val) => {
-                parse_quote! {{ if !(value > #val) { return Err(#error_type::Min) } }}
+                parse_quote! {{ if !(value > #val) { return Err(<Self as nnn::NNNewType>::Error::Min) } }}
             },
             Self::MinOrEq(ref val) => {
-                parse_quote! {{ if !(value >= #val) { return Err(#error_type::MinOrEq) } }}
+                parse_quote! {{ if !(value >= #val) { return Err(<Self as nnn::NNNewType>::Error::MinOrEq) } }}
             },
             Self::Max(ref val) => {
-                parse_quote! {{ if !(value < #val) { return Err(#error_type::Max) } }}
+                parse_quote! {{ if !(value < #val) { return Err(<Self as nnn::NNNewType>::Error::Max) } }}
             },
             Self::MaxOrEq(ref val) => {
-                parse_quote! {{ if !(value <= #val) { return Err(#error_type::MaxOrEq) } }}
+                parse_quote! {{ if !(value <= #val) { return Err(<Self as nnn::NNNewType>::Error::MaxOrEq) } }}
             },
             Self::Positive => {
                 parse_quote! {{
                     // Terrible hack since 0.into() doesn't work for floats
-                    if !(value > false.into()) { return Err(#error_type::Positive) }
+                    if !(value > false.into()) { return Err(<Self as nnn::NNNewType>::Error::Positive) }
                 }}
             },
             Self::Negative => {
                 parse_quote! {{
                     // Terrible hack since 0.into() doesn't work for floats
-                    if ! (value < false.into()) { return Err(#error_type::Negative) }
+                    if ! (value < false.into()) { return Err(<Self as nnn::NNNewType>::Error::Negative) }
                 }}
             },
             // Float specifics
             Self::Finite => {
-                parse_quote! {{ if ! value.is_finite() { return Err(#error_type::Finite) } }}
+                parse_quote! {{ if ! value.is_finite() { return Err(<Self as nnn::NNNewType>::Error::Finite) } }}
             },
             Self::NotInfinite => {
-                parse_quote! {{ if value.is_infinite() { return Err(#error_type::NotInfinite) } }}
+                parse_quote! {{ if value.is_infinite() { return Err(<Self as nnn::NNNewType>::Error::NotInfinite) } }}
             },
             Self::NotNAN => {
-                parse_quote! {{ if value.is_nan() { return Err(#error_type::NotNAN) } }}
+                parse_quote! {{ if value.is_nan() { return Err(<Self as nnn::NNNewType>::Error::NotNAN) } }}
             },
             // String specifics
             Self::Regex(ref regex) => {
@@ -240,14 +238,14 @@ impl Validator {
                     },
                 };
                 parse_quote! {{
-                    if #condition { return Err(#error_type::Regex) }
+                    if #condition { return Err(<Self as nnn::NNNewType>::Error::Regex) }
                 }}
             },
             // Commons
             Self::Exactly(ref val) => {
                 parse_quote! {{
                     #[allow(clippy::float_cmp, reason = "Allows transparency between signed numbers and floats.")]
-                    if value != #val { return Err(#error_type::Exactly) }
+                    if value != #val { return Err(<Self as nnn::NNNewType>::Error::Exactly) }
                 }}
             },
             Self::Custom {
@@ -256,13 +254,13 @@ impl Validator {
                 ..
             } => match *check {
                 CustomFunction::Block(ref block) => parse_quote! {{
-                    if let Err(err) = #block { return Err(#error_type::#error_name(err)) }
+                    if let Err(err) = #block { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
                 }},
                 CustomFunction::Path(ref func) => parse_quote! {{
-                    if let Err(err) = #func(&value) { return Err(#error_type::#error_name(err)) }
+                    if let Err(err) = #func(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
                 }},
                 CustomFunction::Closure(ref expr_closure) => parse_quote! {{
-                    if let Err(err) = (#expr_closure)(&value) { return Err(#error_type::#error_name(err)) }
+                    if let Err(err) = (#expr_closure)(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
                 }},
             },
             Self::Predicate {
@@ -271,25 +269,22 @@ impl Validator {
                 ..
             } => match *check {
                 CustomFunction::Block(ref block) => parse_quote! {{
-                    if !#block { return Err(#error_type::#variant) }
+                    if !#block { return Err(<Self as nnn::NNNewType>::Error::#variant) }
                 }},
                 CustomFunction::Path(ref func) => parse_quote! {{
-                    if !#func(&value) { return Err(#error_type::#variant) }
+                    if !#func(&value) { return Err(<Self as nnn::NNNewType>::Error::#variant) }
                 }},
                 CustomFunction::Closure(ref expr_closure) => {
                     parse_quote! {{
-                        if !(#expr_closure)(&value) { return Err(#error_type::#variant) }
+                        if !(#expr_closure)(&value) { return Err(<Self as nnn::NNNewType>::Error::#variant) }
                     }}
                 },
             },
         }
     }
 
-    pub(crate) fn display_arm(
-        &self,
-        new_type: &crate::NNNType,
-    ) -> Vec<syn::Arm> {
-        let type_name = new_type.type_name();
+    pub(crate) fn display_arm(&self, ctx: &crate::Context) -> Vec<syn::Arm> {
+        let type_name = ctx.type_name();
         match *self {
             // Containers
             Self::NotEmpty => {
@@ -298,7 +293,7 @@ impl Validator {
             },
             Self::Each(ref steps) => {
                 let steps_fmt =
-                    steps.iter().flat_map(|step| step.display_arm(new_type));
+                    steps.iter().flat_map(|step| step.display_arm(ctx));
                 parse_quote! {
                     Self::Each(ref idx, ref inner_err) => write!(fmt, "[{}] Error: '{inner_err}', at index {idx}.", stringify!(#type_name)),
                     #(#steps_fmt)*

@@ -16,15 +16,16 @@ pub(crate) enum Default {
 impl gen::Gen for Default {
     fn gen_impl(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = gen::Implementation> {
-        let inner_type = new_type.inner_type();
-        let type_name = new_type.type_name();
+        let type_name = ctx.type_name();
         let (impl_generics, ty_generics, where_clause) =
-            new_type.generics().split_for_impl();
+            ctx.generics().split_for_impl();
 
         let default_value = match *self {
-            Self::WithInnerDefault => quote! { <#inner_type>::default() },
+            Self::WithInnerDefault => {
+                quote! { <Self as nnn::NNNewType>::Error::default() }
+            },
             Self::WithValue(ref expr) => quote! { #expr },
         };
 
@@ -40,9 +41,9 @@ impl gen::Gen for Default {
 
     fn gen_tests(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = gen::TestFn> {
-        let type_name = new_type.type_name();
+        let type_name = ctx.type_name();
         let err_msg = format!("Type `{type_name}` has invalid default value.",);
 
         iter::once(parse_quote! {

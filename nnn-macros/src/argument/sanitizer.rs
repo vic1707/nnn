@@ -68,7 +68,7 @@ impl Sanitizer {
 impl gen::Gen for Sanitizer {
     fn gen_impl(
         &self,
-        _: &crate::NNNType,
+        _: &crate::Context,
     ) -> impl Iterator<Item = gen::Implementation> {
         iter::once(gen::Implementation::SanitizationStep(self.step()))
     }

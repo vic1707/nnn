@@ -1,6 +1,6 @@
 #![expect(unused_imports, reason = "Not what we're testing.")]
 #![expect(unexpected_cfgs, reason = "Dunno how to generate them properly.")]
-use nnn::nnn;
+use nnn::{nnn, NNNewType as _};
 
 #[nnn(derive(PartialEq, Eq, PartialOrd, Ord))]
 struct Float(f64);

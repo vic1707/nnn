@@ -1,5 +1,5 @@
 #![expect(unused_imports, reason = "_")]
-use nnn::nnn;
+use nnn::{nnn, NNNewType as _};
 
 #[nnn(validators(each(finite, min = 0.0_f64)))]
 struct FiniteFloatsVec(Vec<f64>);

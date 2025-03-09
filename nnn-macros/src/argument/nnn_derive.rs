@@ -42,43 +42,40 @@ impl Parse for NNNDerive {
 impl gen::Gen for NNNDerive {
     fn gen_impl(
         &self,
-        nnn_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = gen::Implementation> {
-        let mod_name = nnn_type.mod_name();
-        let type_name = nnn_type.type_name();
-        let inner_type = nnn_type.inner_type();
-        let error_name = nnn_type.error_name();
+        let type_name = ctx.type_name();
         let (impl_generics, ty_generics, where_clause) =
-            nnn_type.generics().split_for_impl();
+            ctx.generics().split_for_impl();
 
         let impls = match *self {
             Self::Into => vec![gen::Implementation::ItemImpl(parse_quote! {
-                impl #impl_generics ::core::convert::Into<#inner_type> for #type_name #ty_generics #where_clause {
-                    fn into(self) -> #inner_type {
+                impl #impl_generics ::core::convert::Into<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
+                    fn into(self) -> <Self as nnn::NNNewType>::Inner {
                         self.0
                     }
                 }
             })],
             Self::From => vec![gen::Implementation::ItemImpl(parse_quote! {
-                impl #impl_generics ::core::convert::From<#type_name #ty_generics> for #inner_type #where_clause {
-                    fn from(value: #type_name #ty_generics) -> #inner_type {
+                impl #impl_generics ::core::convert::From<#type_name #ty_generics> for <Self as nnn::NNNewType>::Inner #where_clause {
+                    fn from(value: #type_name #ty_generics) -> <Self as nnn::NNNewType>::Inner {
                         value.0
                     }
                 }
             })],
             // TODO: String can do str, Vec can do slices?
             Self::Borrow => vec![gen::Implementation::ItemImpl(parse_quote! {
-                impl #impl_generics ::core::borrow::Borrow<#inner_type> for #type_name #ty_generics #where_clause {
-                    fn borrow(&self) -> &#inner_type {
+                impl #impl_generics ::core::borrow::Borrow<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
+                    fn borrow(&self) -> &<Self as nnn::NNNewType>::Inner {
                         &self.0
                     }
                 }
             })],
             Self::TryFrom => {
                 vec![gen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::convert::TryFrom<#inner_type> for #type_name #ty_generics #where_clause {
-                        type Error = #error_name;
-                        fn try_from(value: #inner_type) -> Result<Self, Self::Error> {
+                    impl #impl_generics ::core::convert::TryFrom<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
+                        type Error = <Self as nnn::NNNewType>::Error;
+                        fn try_from(value: <Self as nnn::NNNewType>::Inner) -> Result<Self, Self::Error> {
                             Self::try_new(value)
                         }
                     }
@@ -91,19 +88,16 @@ impl gen::Gen for NNNDerive {
                         #[derive(Debug, Clone, PartialEq, Eq)]
                         #[non_exhaustive]
                         pub enum #impl_generics #parse_err_name #where_clause {
-                            InnerParse(<#inner_type as ::core::str::FromStr>::Err),
-                            Validation(#error_name),
+                            InnerParse(<<#type_name as nnn::NNNewType>::Inner as ::core::str::FromStr>::Err),
+                            Validation(<#type_name as nnn::NNNewType>::Error),
                         }
                     }),
-                    gen::Implementation::Export(
-                        parse_quote! { use #mod_name::#parse_err_name; },
-                    ),
                     gen::Implementation::ItemImpl(parse_quote! {
                         impl #impl_generics ::core::fmt::Display for #parse_err_name #ty_generics #where_clause {
                             fn fmt(&self, fmt: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                                 match *self {
                                     #parse_err_name::InnerParse(ref err) => {
-                                        write!(fmt, "Failed to parse {}: {err:?}.", stringify!(#inner_type))
+                                        write!(fmt, "Failed to parse {}'s inner: {err:?}.", stringify!(#type_name))
                                     },
                                     #parse_err_name::Validation(ref err) => {
                                         write!(fmt, "Failed to validate parsed: {err}.")

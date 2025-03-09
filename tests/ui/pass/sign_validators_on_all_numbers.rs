@@ -5,7 +5,7 @@ macro_rules! number_wrapper {
         paste::paste! {
             $(
                 mod [< signs _ $ty >] {
-                    use nnn::nnn;
+                    use nnn::{nnn, NNNewType as _};
 
                     #[nnn(validators(positive, negative))]
                     struct NNN($ty);

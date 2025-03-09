@@ -1,5 +1,5 @@
 /* Crate imports */
-use nnn::nnn;
+use nnn::{nnn, NNNewType as _};
 use crate::utils::sign_tests;
 
 sign_tests!(negative,

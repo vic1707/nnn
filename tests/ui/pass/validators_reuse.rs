@@ -1,5 +1,5 @@
 #![expect(unused_imports, reason = "_")]
-use nnn::nnn;
+use nnn::{nnn, NNNewType as _};
 
 #[nnn(validators(not_empty, each(not_empty)))]
 struct StringsVec(Vec<String>);

@@ -1,12 +1,11 @@
 /* Built-in imports */
 extern crate alloc;
-use alloc::{format, string::ToString as _};
+use alloc::format;
 use core::iter;
 /* Crate imports */
 use super::Validator;
 use crate::{gen, utils::syn_ext::SynPathExt as _};
 /* Dependencies */
-use quote::ToTokens as _;
 use syn::{
     parse::{Parse, ParseStream},
     parse_quote,
@@ -48,19 +47,20 @@ impl Parse for Derive {
 impl gen::Gen for Derive {
     fn gen_impl(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = gen::Implementation> {
+        let is_nan_excluded_for_floats = ctx
+            .args()
+            .validators
+            .iter()
+            .any(Validator::excludes_float_nan);
+
         iter::once(match *self {
             Self::Eq(ref path) => {
-                if new_type
-                    .args()
-                    .validators
-                    .iter()
-                    .any(Validator::excludes_float_nan)
-                {
-                    let type_name = new_type.type_name();
+                if is_nan_excluded_for_floats {
+                    let type_name = ctx.type_name();
                     let (impl_generics, ty_generics, where_clause) =
-                        new_type.generics().split_for_impl();
+                        ctx.generics().split_for_impl();
                     gen::Implementation::ItemImpl(parse_quote! {
                         impl #impl_generics #path for #type_name #ty_generics #where_clause {}
                     })
@@ -71,15 +71,10 @@ impl gen::Gen for Derive {
                 }
             },
             Self::Ord(ref path) => {
-                if new_type
-                    .args()
-                    .validators
-                    .iter()
-                    .any(Validator::excludes_float_nan)
-                {
-                    let type_name = new_type.type_name();
+                if is_nan_excluded_for_floats {
+                    let type_name = ctx.type_name();
                     let (impl_generics, ty_generics, where_clause) =
-                        new_type.generics().split_for_impl();
+                        ctx.generics().split_for_impl();
                     let panic_msg = format!("{type_name}::cmp() panicked, because partial_cmp() returned None. Could it be that you're using unsafe {type_name}::new_unchecked() ?");
                     gen::Implementation::ItemImpl(parse_quote! {
                         #[expect(clippy::derive_ord_xor_partial_ord, reason = "Manual impl when involving floats.")]
@@ -97,11 +92,9 @@ impl gen::Gen for Derive {
                 }
             },
             Self::Deserialize(ref path) => {
-                let inner_type =
-                    new_type.inner_type().to_token_stream().to_string();
                 gen::Implementation::Attribute(parse_quote! {
                     #[derive(#path)]
-                    #[serde(try_from = #inner_type)]
+                    #[serde(try_from = "<Self as nnn::NNNewType>::Inner")]
                 })
             },
             Self::Transparent(ref path) => gen::Implementation::Attribute(

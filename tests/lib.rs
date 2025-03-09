@@ -76,7 +76,7 @@ pub mod utils {
                 paste::paste! {
                     mod [< $sign_test _ $ty >] {
                         use rstest::rstest;
-                        use nnn::nnn;
+                        use nnn::{nnn, NNNewType as _};
 
                         #[nnn(validators($sign_test))]
                         struct NNN($ty);

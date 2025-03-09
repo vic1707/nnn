@@ -44,68 +44,35 @@ pub(crate) struct Arguments {
 impl Arguments {
     pub(crate) fn get_impls(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> Vec<gen::Implementation> {
-        (self
-            .nnn_derives
-            .iter()
-            .flat_map(|der| der.gen_impl(new_type)))
-        .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_impl(new_type)))
-        .chain(self.consts.iter().flat_map(|cst| cst.gen_impl(new_type)))
-        .chain(self.derives.iter().flat_map(|der| der.gen_impl(new_type)))
-        .chain(self.default.iter().flat_map(|def| def.gen_impl(new_type)))
-        .chain(
-            self.new_unchecked
-                .iter()
-                .flat_map(|nu| nu.gen_impl(new_type)),
-        )
-        .chain(
-            self.sanitizers
-                .iter()
-                .flat_map(|san| san.gen_impl(new_type)),
-        )
-        .chain(
-            self.validators
-                .iter()
-                .flat_map(|val| val.gen_impl(new_type)),
-        )
-        .chain(
-            self.transparents
-                .iter()
-                .map(|meta| parse_quote! { #[#meta] })
-                .map(|attr| gen::Implementation::Attribute(vec![attr])),
-        )
-        .collect()
+        (self.nnn_derives.iter().flat_map(|der| der.gen_impl(ctx)))
+            .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_impl(ctx)))
+            .chain(self.consts.iter().flat_map(|cst| cst.gen_impl(ctx)))
+            .chain(self.derives.iter().flat_map(|der| der.gen_impl(ctx)))
+            .chain(self.default.iter().flat_map(|def| def.gen_impl(ctx)))
+            .chain(self.new_unchecked.iter().flat_map(|nu| nu.gen_impl(ctx)))
+            .chain(self.sanitizers.iter().flat_map(|san| san.gen_impl(ctx)))
+            .chain(self.validators.iter().flat_map(|val| val.gen_impl(ctx)))
+            .chain(
+                self.transparents
+                    .iter()
+                    .map(|meta| parse_quote! { #[#meta] })
+                    .map(|attr| gen::Implementation::Attribute(vec![attr])),
+            )
+            .collect()
     }
 
-    pub(crate) fn get_tests(
-        &self,
-        new_type: &crate::NNNType,
-    ) -> Vec<gen::TestFn> {
-        (self
-            .nnn_derives
-            .iter()
-            .flat_map(|der| der.gen_tests(new_type)))
-        .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_tests(new_type)))
-        .chain(self.consts.iter().flat_map(|cst| cst.gen_tests(new_type)))
-        .chain(self.derives.iter().flat_map(|der| der.gen_tests(new_type)))
-        .chain(self.default.iter().flat_map(|def| def.gen_tests(new_type)))
-        .chain(
-            self.new_unchecked
-                .iter()
-                .flat_map(|nu| nu.gen_tests(new_type)),
-        )
-        .chain(
-            self.sanitizers
-                .iter()
-                .flat_map(|san| san.gen_tests(new_type)),
-        )
-        .chain(
-            self.validators
-                .iter()
-                .flat_map(|val| val.gen_tests(new_type)),
-        )
-        .collect()
+    pub(crate) fn get_tests(&self, ctx: &crate::Context) -> Vec<gen::TestFn> {
+        (self.nnn_derives.iter().flat_map(|der| der.gen_tests(ctx)))
+            .chain(self.cfgs.iter().flat_map(|cfg| cfg.gen_tests(ctx)))
+            .chain(self.consts.iter().flat_map(|cst| cst.gen_tests(ctx)))
+            .chain(self.derives.iter().flat_map(|der| der.gen_tests(ctx)))
+            .chain(self.default.iter().flat_map(|def| def.gen_tests(ctx)))
+            .chain(self.new_unchecked.iter().flat_map(|nu| nu.gen_tests(ctx)))
+            .chain(self.sanitizers.iter().flat_map(|san| san.gen_tests(ctx)))
+            .chain(self.validators.iter().flat_map(|val| val.gen_tests(ctx)))
+            .collect()
     }
 }
 

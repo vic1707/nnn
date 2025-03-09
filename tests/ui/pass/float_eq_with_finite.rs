@@ -1,5 +1,5 @@
 #![expect(unused_imports, reason = "_")]
-use nnn::nnn;
+use nnn::{nnn, NNNewType as _};
 
 #[nnn(derive(PartialEq, Eq), validators(finite))]
 struct FiniteFloat(f64);

@@ -26,9 +26,9 @@ impl Parse for Cfg {
 impl gen::Gen for Cfg {
     fn gen_impl(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = gen::Implementation> {
-        self.args.get_impls(new_type).into_iter().map(|mut r#impl| {
+        self.args.get_impls(ctx).into_iter().map(|mut r#impl| {
             r#impl.make_conditional(&self.condition);
             r#impl
         })
@@ -36,9 +36,9 @@ impl gen::Gen for Cfg {
 
     fn gen_tests(
         &self,
-        new_type: &crate::NNNType,
+        ctx: &crate::Context,
     ) -> impl Iterator<Item = gen::TestFn> {
-        self.args.get_tests(new_type).into_iter().map(|mut test| {
+        self.args.get_tests(ctx).into_iter().map(|mut test| {
             test.make_conditional(&self.condition);
             test
         })

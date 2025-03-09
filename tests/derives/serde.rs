@@ -1,5 +1,5 @@
 /* Crate imports */
-use nnn::nnn;
+use nnn::{nnn, NNNewType as _};
 /* Dependencies */
 use rstest::rstest;
 use serde::{Deserialize, Serialize};

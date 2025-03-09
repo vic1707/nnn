@@ -1,7 +1,7 @@
 #![expect(unused_imports, reason = "Not what we're testing.")]
 //! Is compile time error if feature `regex_validation` is enabled
 //! else it will compile but fail generated tests.
-use nnn::nnn;
+use nnn::{nnn, NNNewType as _};
 
 #[nnn(validators(regex = r#"(\d+"#))]
 struct InvalidRegex(String);
