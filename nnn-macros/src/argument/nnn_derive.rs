@@ -62,8 +62,8 @@ impl codegen::Gen for NNNDerive {
             },
             Self::From => {
                 vec![codegen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::convert::From<#type_name #ty_generics> for <Self as nnn::NNNewType>::Inner #where_clause {
-                        fn from(value: #type_name #ty_generics) -> <Self as nnn::NNNewType>::Inner {
+                    impl #impl_generics ::core::convert::From<#type_name #ty_generics> for <#type_name as nnn::NNNewType>::Inner #where_clause {
+                        fn from(value: #type_name #ty_generics) -> Self {
                             value.0
                         }
                     }

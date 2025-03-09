@@ -28,10 +28,15 @@ mod validators {
     mod custom;
     mod predicate;
 }
-#[rustfmt::skip] // wants to reorder modules
+
 mod derives {
+    mod borrow;
+    mod from;
     mod from_str;
+    mod into;
+    mod into_iterator;
     mod serde;
+    mod try_from;
 }
 
 #[rustfmt::skip] // wants to reorder modules
