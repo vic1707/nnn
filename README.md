@@ -111,9 +111,21 @@ Passed transparently, with `nnn` injecting `#[serde(try_from = "<inner>")]` to e
 
 **Note:** Some derives are disallowed as they bypass validation. For these cases, `nnn` provides a custom `nnn_derive` to replace standard derives while ensuring validation and sanitization are preserved.
 
+##### Custom derives
+
+`nnn` provides custom implementations of some common derives to implement `nnn`'s guarantees.
+
+1. **`Into`/`From`/`Borrow`**
+
+These derives their respective traits to convert from a new_type to its inner type.
+
+2. **`TryFrom`**
+
+Implements `TryFrom` and calls the `try_new` methods.
+
 3. **`FromStr`**
 
-Provided via the `nnn_derive` argument, generates an implementation using the inner `FromStr` implementation and passing parsed value through sanitization and validation.
+Generates an implementation using the inner `FromStr` implementation and passing parsed value through sanitization and validation.
 It generates the following error enum implementing `Debug`, `Clone`, `PartialEq`, `Eq` and `Display`.
 
 ```rs
@@ -122,6 +134,10 @@ enum /* new_type's name */ParseError {
     Validation(/* new_type's name */Error),
 }
 ```
+
+4. `IntoIterator`
+
+Implements `IntoIterator` for the new-type and a reference to it, the iterator yields items from the inner type's iterator implementation.
 
 ---
 
