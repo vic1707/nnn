@@ -61,6 +61,8 @@ impl codegen::Gen for AssociatedConst {
         iter::once(parse_quote! {
             #[test]
             fn #test_name() {
+                use nnn::NNNewType as _;
+
                 let inner_value = <#type_name>::#const_name.into_inner();
                 <#type_name>::try_new(inner_value).expect(#err_msg);
             }

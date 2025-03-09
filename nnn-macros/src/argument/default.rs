@@ -49,8 +49,10 @@ impl codegen::Gen for Default {
         iter::once(parse_quote! {
             #[test]
             fn should_have_valid_default_value() {
-                let default_inner = #type_name::default().into_inner();
-                let rebuilt_default = #type_name::try_new(default_inner).expect(#err_msg);
+                use nnn::NNNewType as _;
+
+                let default_inner = <#type_name>::default().into_inner();
+                let rebuilt_default = <#type_name>::try_new(default_inner).expect(#err_msg);
                 assert_eq!(
                     default_inner,
                     rebuilt_default.into_inner(),

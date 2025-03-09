@@ -84,7 +84,7 @@ impl codegen::Gen for NNNDerive {
                     impl #impl_generics ::core::convert::TryFrom<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
                         type Error = <Self as nnn::NNNewType>::Error;
                         fn try_from(value: <Self as nnn::NNNewType>::Inner) -> Result<Self, Self::Error> {
-                            Self::try_new(value)
+                            <Self as nnn::NNNewType>::try_new(value)
                         }
                     }
                 })]
@@ -119,7 +119,7 @@ impl codegen::Gen for NNNDerive {
                             type Err = #parse_err_name;
 
                             fn from_str(input: &str) -> ::core::result::Result<Self, Self::Err> {
-                                Self::try_new(
+                                <Self as nnn::NNNewType>::try_new(
                                     input.parse().map_err(#parse_err_name::InnerParse)?
                                 ).map_err(#parse_err_name::Validation)
                             }
