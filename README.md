@@ -118,10 +118,12 @@ Passed transparently, with `nnn` injecting `#[serde(try_from = "<inner>")]` to e
 1. **`Into`/`From`/`Borrow`**
 
 These derives their respective traits to convert from a new_type to its inner type.
+These derives can take generic inputs as parameters, `#[nnn_derive(Into<i8, i16, 132>)]` will generate derives for `Into<i8>`/`Into<i16>`/`Into<i32>` for the new_type. `#[nnn_derive(Into)]` still defaults to deriving `Into<inner_type>`.
 
 2. **`TryFrom`**
 
 Implements `TryFrom` and calls the `try_new` methods.
+`TryFrom` can take generic parameters as parameters, `#[nnn_derive(TryFrom<i8, i16, 132>)]` will generate derives for `TryFrom<i8>`/`TryFrom<i16>`/`TryFrom<i32>`. `#[nnn_derive(TryFrom)]` still defaults to deriving `TryFrom<inner_type>`.
 
 3. **`FromStr`**
 
