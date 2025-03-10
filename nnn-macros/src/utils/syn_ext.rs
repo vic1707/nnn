@@ -12,6 +12,7 @@ use syn::{
     parse::{Parse, ParseBuffer},
     punctuated::Punctuated,
     token::Comma,
+    PathSegment,
 };
 
 pub(crate) trait SynDataExt {
@@ -71,6 +72,7 @@ impl SynParseBufferExt for ParseBuffer<'_> {
 
 pub(crate) trait SynPathExt {
     fn as_ident(&self) -> syn::Ident;
+    fn trait_segment(&self) -> syn::Result<&PathSegment>;
     fn item_name(&self) -> syn::Result<String>;
 }
 
@@ -89,13 +91,15 @@ impl SynPathExt for syn::Path {
         )
     }
 
+    fn trait_segment(&self) -> syn::Result<&PathSegment> {
+        self.segments.last().ok_or_else(|| {
+            syn::Error::new_spanned(self, "Trait doesn't have a name ??")
+        })
+    }
+
     fn item_name(&self) -> syn::Result<String> {
-        self.segments
-            .last()
+        self.trait_segment()
             .map(|seg| &seg.ident)
             .map(ToString::to_string)
-            .ok_or_else(|| {
-                syn::Error::new_spanned(self, "Trait doesn't have a name ??")
-            })
     }
 }

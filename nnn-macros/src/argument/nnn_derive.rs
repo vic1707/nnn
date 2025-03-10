@@ -10,29 +10,64 @@ use syn::{
     parse_quote,
 };
 
-#[derive(Debug)]
 /// Derives provided by the crate.
 /// Most of them are also available via crates like `derive_more`.
 /// Providing them so users aren't required to install other crates for trivial derives.
 pub(crate) enum NNNDerive {
-    Into,
-    From,
-    TryFrom,
-    Borrow,
+    Into(Option<syn::AngleBracketedGenericArguments>),
+    From(Option<syn::AngleBracketedGenericArguments>),
+    TryFrom(Option<syn::AngleBracketedGenericArguments>),
+    Borrow(Option<syn::AngleBracketedGenericArguments>),
     FromStr,
     IntoIterator,
+}
+
+impl NNNDerive {
+    fn default_target(
+        &self,
+        ctx: &crate::Context,
+    ) -> syn::AngleBracketedGenericArguments {
+        let type_name = ctx.type_name();
+        match *self {
+            Self::Into(_) | Self::TryFrom(_) | Self::Borrow(_) => {
+                parse_quote! { <<Self as nnn::NNNewType>::Inner> }
+            },
+            Self::From(_) => {
+                parse_quote! { <<#type_name as nnn::NNNewType>::Inner> }
+            },
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl Parse for NNNDerive {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let trait_path = syn::Path::parse(input)?;
         match trait_path.item_name()?.as_str() {
-            "Into" => Ok(Self::Into),
-            "From" => Ok(Self::From),
-            "TryFrom" => Ok(Self::TryFrom),
-            "Borrow" => Ok(Self::Borrow),
-            "FromStr" => Ok(Self::FromStr),
-            "IntoIterator" => Ok(Self::IntoIterator),
+            "Into" => {
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::Into(targets))
+            },
+            "From" => {
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::From(targets))
+            },
+            "TryFrom" => {
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::TryFrom(targets))
+            },
+            "Borrow" => {
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::Borrow(targets))
+            },
+            "FromStr" => {
+                assert_no_generics_params(&trait_path)?;
+                Ok(Self::FromStr)
+            },
+            "IntoIterator" => {
+                assert_no_generics_params(&trait_path)?;
+                Ok(Self::IntoIterator)
+            },
             _ => Err(syn::Error::new_spanned(
                 trait_path,
                 "Unknown `nnn_derive`.",
@@ -51,43 +86,98 @@ impl codegen::Gen for NNNDerive {
             ctx.generics().split_for_impl();
 
         let impls = match *self {
-            Self::Into => {
-                vec![codegen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::convert::Into<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
-                        fn into(self) -> <Self as nnn::NNNewType>::Inner {
-                            self.0
-                        }
-                    }
-                })]
+            Self::Into(ref targets) => {
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
+                    .args
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
+                    .map(|target| {
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::convert::Into<#target> for #type_name #ty_generics #where_clause {
+                                fn into(self) -> #target {
+                                    self.0.into()
+                                }
+                            }
+                        })
+                    })
+                    .collect()
             },
-            Self::From => {
-                vec![codegen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::convert::From<#type_name #ty_generics> for <#type_name as nnn::NNNewType>::Inner #where_clause {
-                        fn from(value: #type_name #ty_generics) -> Self {
-                            value.0
-                        }
-                    }
-                })]
+            Self::From(ref targets) => {
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
+                    .args
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
+                    .map(|target| {
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::convert::From<#type_name #ty_generics> for #target #where_clause {
+                                fn from(value: #type_name #ty_generics) -> #target {
+                                    value.0.into()
+                                }
+                            }
+                        })
+                    })
+                    .collect()
             },
-            // TODO: String can do str, Vec can do slices?
-            Self::Borrow => {
-                vec![codegen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::borrow::Borrow<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
-                        fn borrow(&self) -> &<Self as nnn::NNNewType>::Inner {
-                            &self.0
-                        }
-                    }
-                })]
+            Self::Borrow(ref targets) => {
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
+                    .args
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
+                    .map(|target| {
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::borrow::Borrow<#target> for #type_name #ty_generics #where_clause {
+                                fn borrow(&self) -> &#target {
+                                    &self.0
+                                }
+                            }
+                        })
+                    })
+                    .collect()
             },
-            Self::TryFrom => {
-                vec![codegen::Implementation::ItemImpl(parse_quote! {
-                    impl #impl_generics ::core::convert::TryFrom<<Self as nnn::NNNewType>::Inner> for #type_name #ty_generics #where_clause {
-                        type Error = <Self as nnn::NNNewType>::Error;
-                        fn try_from(value: <Self as nnn::NNNewType>::Inner) -> Result<Self, Self::Error> {
-                            <Self as nnn::NNNewType>::try_new(value)
-                        }
-                    }
-                })]
+            Self::TryFrom(ref targets) => {
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
+                    .args
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
+                    .map(|target| {
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::convert::TryFrom<#target> for #type_name #ty_generics #where_clause {
+                                type Error = <Self as nnn::NNNewType>::Error;
+                                fn try_from(value: #target) -> Result<Self, Self::Error> {
+                                    <Self as nnn::NNNewType>::try_new(value.into())
+                                }
+                            }
+                        })
+                    })
+                    .collect()
             },
             Self::FromStr => {
                 let parse_err_name = format_ident!("{type_name}ParseError");
@@ -161,5 +251,35 @@ impl codegen::Gen for NNNDerive {
         };
 
         impls.into_iter()
+    }
+}
+
+fn extract_generics_targets(
+    trait_path: &syn::Path,
+) -> syn::Result<Option<syn::AngleBracketedGenericArguments>> {
+    match trait_path.trait_segment().cloned()?.arguments {
+        // If no arguments were given to the trait, e.g., "Into" instead of "Into<Target>",
+        // we insert the new-type's inner type as the target.
+        syn::PathArguments::None => Ok(None),
+        syn::PathArguments::AngleBracketed(args) if args.args.is_empty() => Err(syn::Error::new_spanned(
+            args,
+            "Please provide generics arguments, or omit the '<>' for the default derive.",
+        )),
+        syn::PathArguments::AngleBracketed(args) => Ok(Some(args)),
+        syn::PathArguments::Parenthesized(args) => Err(syn::Error::new_spanned(
+            args,
+            "Trait isn't allowed to take parenthesized generics arguments.",
+        )),
+    }
+}
+
+fn assert_no_generics_params(trait_path: &syn::Path) -> syn::Result<()> {
+    let args = trait_path.trait_segment().cloned()?.arguments;
+    match args {
+        syn::PathArguments::None => Ok(()),
+        _ => Err(syn::Error::new_spanned(
+            args,
+            "Trait isn't allowed to take generics arguments.",
+        )),
     }
 }
