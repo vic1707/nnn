@@ -92,7 +92,13 @@ impl codegen::Gen for NNNDerive {
                     .clone()
                     .unwrap_or(self.default_target(ctx))
                     .args
-                    .iter()
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
                     .map(|target| {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::convert::Into<#target> for #type_name #ty_generics #where_clause {
@@ -109,7 +115,13 @@ impl codegen::Gen for NNNDerive {
                     .clone()
                     .unwrap_or(self.default_target(ctx))
                     .args
-                    .iter()
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
                     .map(|target| {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::convert::From<#type_name #ty_generics> for #target #where_clause {
@@ -126,7 +138,13 @@ impl codegen::Gen for NNNDerive {
                     .clone()
                     .unwrap_or(self.default_target(ctx))
                     .args
-                    .iter()
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
                     .map(|target| {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::borrow::Borrow<#target> for #type_name #ty_generics #where_clause {
@@ -143,7 +161,13 @@ impl codegen::Gen for NNNDerive {
                     .clone()
                     .unwrap_or(self.default_target(ctx))
                     .args
-                    .iter()
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
                     .map(|target| {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::convert::TryFrom<#target> for #type_name #ty_generics #where_clause {
