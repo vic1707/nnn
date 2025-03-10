@@ -10,7 +10,6 @@ use syn::{
     parse_quote,
 };
 
-#[derive(Debug)]
 /// Derives provided by the crate.
 /// Most of them are also available via crates like `derive_more`.
 /// Providing them so users aren't required to install other crates for trivial derives.
