@@ -44,6 +44,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1.11.0
         with:
           toolchain: nightly
+          cache: false
 
       - name: Publish to crates.io
         run: cargo +nightly -Z package-workspace publish --workspace --locked
