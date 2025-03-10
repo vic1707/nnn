@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.1.0] - 2025-03-10
+
+- **Feature:** add `AsRef` derive ([34e07733](https://github.com/vic1707/nnn/commit/34e07733)).
+- **Feature:** add `Deref` derive ([3e9c7fa1](https://github.com/vic1707/nnn/commit/3e9c7fa1)).
+- **Feature:** allow some derives to take generic inputs as targets ([bd29f3f1](https://github.com/vic1707/nnn/commit/bd29f3f1))
+- **Improvement:**: Add `CHANGELOG.md` ([3fc6aff7](https://github.com/vic1707/nnn/commit/3fc6aff7)).
+
 ## [v1.0.2] - 2025-03-09
 
 ### Fixed
@@ -9,7 +16,7 @@ All notable changes to this project are documented in this file.
 - **Fix:** Add compile tests for `nnn_derives` and fix `From` ([cb628ad](https://github.com/vic1707/nnn/commit/cb628ad))
 - **Chore:** Code formatting update ([5b6d08c](https://github.com/vic1707/nnn/commit/5b6d08c))
 
-## [v1.0.1] - 2025-03-09 
+## [v1.0.1] - 2025-03-09
 
 - **Fix:** Correct missing use statements and syntax in generated code ([5365393](https://github.com/vic1707/nnn/commit/5365393))
 - **Docs:** Improve and add missing documentation ([21af9cb](https://github.com/vic1707/nnn/commit/21af9cb))
