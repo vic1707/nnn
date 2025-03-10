@@ -21,6 +21,7 @@ pub(crate) enum NNNDerive {
     FromStr,
     IntoIterator,
     AsRef(Option<syn::AngleBracketedGenericArguments>),
+    Deref(Option<syn::AngleBracketedGenericArguments>),
 }
 
 impl NNNDerive {
@@ -33,7 +34,8 @@ impl NNNDerive {
             Self::Into(_)
             | Self::TryFrom(_)
             | Self::Borrow(_)
-            | Self::AsRef(_) => {
+            | Self::AsRef(_)
+            | Self::Deref(_) => {
                 parse_quote! { <<Self as nnn::NNNewType>::Inner> }
             },
             Self::From(_) => {
@@ -75,6 +77,10 @@ impl Parse for NNNDerive {
             "AsRef" => {
                 let targets = extract_generics_targets(&trait_path)?;
                 Ok(Self::AsRef(targets))
+            },
+            "Deref" => {
+                let targets = extract_generics_targets(&trait_path)?;
+                Ok(Self::Deref(targets))
             },
             _ => Err(syn::Error::new_spanned(
                 trait_path,
@@ -270,6 +276,30 @@ impl codegen::Gen for NNNDerive {
                         codegen::Implementation::ItemImpl(parse_quote! {
                             impl #impl_generics ::core::convert::AsRef<#target> for #type_name #ty_generics #where_clause {
                                 fn as_ref(&self) -> &#target {
+                                    &self.0
+                                }
+                            }
+                        })
+                    })
+                    .collect()
+            },
+            Self::Deref(ref targets) => {
+                targets
+                    .clone()
+                    .unwrap_or(self.default_target(ctx))
+                    .args
+                    .into_iter()
+                    // use `_` as if it were `<inner_type>`
+                    .map(|arg| {
+                        if let syn::GenericArgument::Type(syn::Type::Infer(_)) = arg {
+                            self.default_target(ctx).args[0].clone()
+                        } else{ arg }
+                    })
+                    .map(|target| {
+                        codegen::Implementation::ItemImpl(parse_quote! {
+                            impl #impl_generics ::core::ops::Deref for #type_name #ty_generics #where_clause {
+                                type Target = #target;
+                                fn deref(&self) -> &Self::Target {
                                     &self.0
                                 }
                             }

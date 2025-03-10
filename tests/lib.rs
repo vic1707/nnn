@@ -32,6 +32,7 @@ mod validators {
 mod derives {
     mod as_ref;
     mod borrow;
+    mod deref;
     mod from;
     mod from_str;
     mod into;
