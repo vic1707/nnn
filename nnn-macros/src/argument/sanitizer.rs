@@ -44,13 +44,9 @@ impl Sanitizer {
             Self::Sort => parse_quote! {{ value.sort(); }},
             Self::Dedup => parse_quote! {{ value.dedup(); }},
             // Strings
-            Self::Trim => parse_quote! {{ value = value.trim().to_owned(); }},
-            Self::Lowercase => {
-                parse_quote! {{ value = value.to_lowercase().to_owned(); }}
-            },
-            Self::Uppercase => {
-                parse_quote! {{ value = value.to_uppercase().to_owned(); }}
-            },
+            Self::Trim => parse_quote! {{ value = value.trim().into(); }},
+            Self::Lowercase => parse_quote! {{ value = value.to_lowercase(); }},
+            Self::Uppercase => parse_quote! {{ value = value.to_uppercase(); }},
             // Common
             Self::Custom(ref custom) => match *custom {
                 CustomFunction::Block(ref block) => parse_quote! { #block },
