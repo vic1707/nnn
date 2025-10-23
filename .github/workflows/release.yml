@@ -13,19 +13,19 @@ jobs:
     name: Ensure documentation builds
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5.0.0
         with:
           submodules: true
           persist-credentials: false
 
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1.11.0
+        uses: actions-rust-lang/setup-rust-toolchain@v1.15.1
         with:
           toolchain: nightly
           cache: false
 
       - name: Install cargo-doc-rs
-        uses: taiki-e/install-action@v2.49.18
+        uses: taiki-e/install-action@v2.62.15
         with:
           tool: cargo-docs-rs
 
@@ -35,13 +35,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: ensure-doc
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5.0.0
         with:
           submodules: true
           persist-credentials: false
 
       - name: Install Rust (nightly)
-        uses: actions-rust-lang/setup-rust-toolchain@v1.11.0
+        uses: actions-rust-lang/setup-rust-toolchain@v1.15.1
         with:
           toolchain: nightly
           cache: false
