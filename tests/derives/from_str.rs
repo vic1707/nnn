@@ -1,5 +1,5 @@
 /* Crate imports */
-use nnn::{nnn, NNNewType as _};
+use nnn::{NNNewType as _, nnn};
 /* Built-in imports */
 use core::str::FromStr;
 /* Dependencies */
