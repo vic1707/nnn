@@ -1,7 +1,7 @@
 [package]
 name = "nnn"
 version = "1.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["Victor LEFEBVRE <contact@vic1707.xyz>"]
 description = "Generate your newtypes from a single macro."
 documentation = "https://docs.rs/nnn"
