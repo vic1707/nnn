@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.2.0] - 2025-10-23
+
+- **Chore:** Upgrade to rust 2024 edition ([8bf801aa](https://github.com/vic1707/nnn/commit/8bf801aa))
+- **Chore:** Fix zizmor's pin hash issues ([0cd472e7](https://github.com/vic1707/nnn/commit/0cd472e7))
+
 ## [v1.1.0] - 2025-03-10
 
 - **Feature:** add `AsRef` derive ([34e07733](https://github.com/vic1707/nnn/commit/34e07733)).
