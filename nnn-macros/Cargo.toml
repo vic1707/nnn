@@ -11,7 +11,7 @@ readme = "README.md"
 repository = "https://github.com/vic1707/nnn"
 categories = ["data-structures", "rust-patterns"]
 keywords = ["newtype", "validation", "sanitization", "derive", "invariant"]
-rust-version = "1.82.0"
+rust-version = "1.85.0"
 
 [lib]
 proc-macro = true
