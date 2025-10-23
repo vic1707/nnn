@@ -20,12 +20,12 @@ jobs:
   code-hygiene:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1.15.1
+        uses: actions-rust-lang/setup-rust-toolchain@1780873c7b576612439a134613cc4cc74ce5538c # v1.15.2
         with:
           components: rustfmt, clippy
           toolchain: ${{ env.MSRV }}
@@ -37,18 +37,17 @@ jobs:
         run: cargo clippy --all-features
 
       - name: Check for typos
-        uses: crate-ci/typos@v1.37.1
+        uses: crate-ci/typos@80c8a4945eec0f6d464eaf9e65ed98ef085283d1 # v1.38.1
 
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          submodules: true
           persist-credentials: false
 
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1.15.1
+        uses: actions-rust-lang/setup-rust-toolchain@1780873c7b576612439a134613cc4cc74ce5538c # v1.15.2
         with:
           components: rust-src # https://github.com/dtolnay/trybuild?tab=readme-ov-file#troubleshooting
           toolchain: ${{ env.MSRV }}
@@ -65,13 +64,12 @@ jobs:
   zizmor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          submodules: true
           persist-credentials: false
 
       - name: Install Zizmor
-        uses: taiki-e/install-action@v2.62.15
+        uses: taiki-e/install-action@ebb229c6baa68383264f2822689b07b4916d9177 # v2.62.36
         with:
           tool: zizmor
 
