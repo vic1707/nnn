@@ -1,7 +1,7 @@
 [package]
 name = "nnn"
 version = "1.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["Victor LEFEBVRE <contact@vic1707.xyz>"]
 description = "Generate your newtypes from a single macro."
 documentation = "https://docs.rs/nnn"
@@ -11,7 +11,7 @@ readme = "README.md"
 repository = "https://github.com/vic1707/nnn"
 categories = ["data-structures", "rust-patterns"]
 keywords = ["newtype", "validation", "sanitization", "derive", "invariant"]
-rust-version = "1.82.0"
+rust-version = "1.85.0"
 
 [workspace]
 resolver = "2"
