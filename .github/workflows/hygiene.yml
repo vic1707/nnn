@@ -37,7 +37,7 @@ jobs:
         run: cargo clippy --all-features
 
       - name: Check for typos
-        uses: crate-ci/typos@80c8a4945eec0f6d464eaf9e65ed98ef085283d1 # v1.38.1
+        uses: crate-ci/typos@07d900b8fa1097806b8adb6391b0d3e0ac2fdea7 # v1.39.0
 
   tests:
     runs-on: ubuntu-latest
@@ -69,7 +69,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Zizmor
-        uses: taiki-e/install-action@ebb229c6baa68383264f2822689b07b4916d9177 # v2.62.36
+        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2.62.44
         with:
           tool: zizmor
 
