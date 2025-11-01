@@ -24,7 +24,7 @@ jobs:
           cache: false
 
       - name: Install cargo-doc-rs
-        uses: taiki-e/install-action@ebb229c6baa68383264f2822689b07b4916d9177 # v2.62.36
+        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2.62.44
         with:
           tool: cargo-docs-rs
 
