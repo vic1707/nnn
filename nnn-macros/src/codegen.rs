@@ -20,6 +20,7 @@ pub(crate) trait Gen {
     ) -> impl Iterator<Item = Implementation>;
 }
 
+#[allow(clippy::large_enum_variant)]
 pub(crate) enum Implementation {
     /// an impl block
     ItemImpl(syn::ItemImpl),

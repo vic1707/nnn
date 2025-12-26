@@ -107,6 +107,7 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
     }
 }
 
+#[allow(clippy::large_enum_variant)]
 pub(crate) enum Argument {
     NNNDerive(Punctuated<NNNDerive, Comma>),
     Cfg(Cfg),
