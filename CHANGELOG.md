@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.2.2] - 2025-12-26
+
+- **Feat:** Support for custom test-harness ([7439a6a0](https://github.com/vic1707/nnn/commit/7439a6a0))
+
 ## [v1.2.1] - 2025-12-26
 
 - **Chore:** fix zizmor ([ce40569c](https://github.com/vic1707/nnn/commit/ce40569c))
