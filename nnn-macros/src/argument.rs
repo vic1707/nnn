@@ -165,7 +165,10 @@ impl Parse for Argument {
                 Self::CustomTestHarness(input.parse_equal()?)
             },
             _ => {
-                return Err(syn::Error::new_spanned(ident, "Unknown argument."))
+                return Err(syn::Error::new_spanned(
+                    ident,
+                    "Unknown argument.",
+                ));
             },
         };
 

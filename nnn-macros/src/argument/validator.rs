@@ -11,7 +11,7 @@ use crate::{
     },
 };
 /* Dependencies */
-use quote::{format_ident, ToTokens as _};
+use quote::{ToTokens as _, format_ident};
 use syn::{
     parse::{Parse, ParseStream},
     parse_quote,
@@ -484,7 +484,10 @@ impl Parse for Validator {
                 Self::Predicate { check, variant }
             },
             _ => {
-                return Err(syn::Error::new_spanned(name, "Unknown validator."))
+                return Err(syn::Error::new_spanned(
+                    name,
+                    "Unknown validator.",
+                ));
             },
         };
 

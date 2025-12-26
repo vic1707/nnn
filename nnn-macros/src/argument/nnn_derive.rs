@@ -320,15 +320,19 @@ fn extract_generics_targets(
         // If no arguments were given to the trait, e.g., "Into" instead of "Into<Target>",
         // we insert the new-type's inner type as the target.
         syn::PathArguments::None => Ok(None),
-        syn::PathArguments::AngleBracketed(args) if args.args.is_empty() => Err(syn::Error::new_spanned(
-            args,
-            "Please provide generics arguments, or omit the '<>' for the default derive.",
-        )),
+        syn::PathArguments::AngleBracketed(args) if args.args.is_empty() => {
+            Err(syn::Error::new_spanned(
+                args,
+                "Please provide generics arguments, or omit the '<>' for the default derive.",
+            ))
+        },
         syn::PathArguments::AngleBracketed(args) => Ok(Some(args)),
-        syn::PathArguments::Parenthesized(args) => Err(syn::Error::new_spanned(
-            args,
-            "Trait isn't allowed to take parenthesized generics arguments.",
-        )),
+        syn::PathArguments::Parenthesized(args) => {
+            Err(syn::Error::new_spanned(
+                args,
+                "Trait isn't allowed to take parenthesized generics arguments.",
+            ))
+        },
     }
 }
 

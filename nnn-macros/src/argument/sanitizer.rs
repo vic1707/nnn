@@ -85,7 +85,10 @@ impl Parse for Sanitizer {
             // Common
             "custom" => Self::Custom(input.parse_equal()?),
             _ => {
-                return Err(syn::Error::new_spanned(name, "Unknown sanitizer."))
+                return Err(syn::Error::new_spanned(
+                    name,
+                    "Unknown sanitizer.",
+                ));
             },
         };
 

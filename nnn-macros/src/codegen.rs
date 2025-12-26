@@ -72,7 +72,9 @@ impl Implementation {
                     .for_each(|arm| arm.attrs.push(cfg_attr.clone()));
             },
             Self::Enum(ref mut item) => item.attrs.push(cfg_attr),
-            Self::CustomTestHarness(_) => panic!("`custom_test_harness` not supported in `cfg`."),
+            Self::CustomTestHarness(_) => {
+                panic!("`custom_test_harness` not supported in `cfg`.")
+            },
         }
     }
 

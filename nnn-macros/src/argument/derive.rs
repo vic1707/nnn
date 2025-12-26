@@ -22,22 +22,25 @@ pub(crate) enum Derive {
 impl Parse for Derive {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let trait_path = syn::Path::parse(input)?;
-        match trait_path.item_name()?.as_str()
-        {
+        match trait_path.item_name()?.as_str() {
             // Special cases
             "Eq" => Ok(Self::Eq(trait_path)),
             "Ord" => Ok(Self::Ord(trait_path)),
             "Deserialize" => Ok(Self::Deserialize(trait_path)),
             // Forbidden derives
-            derive_more @ (
-                "Add" | "AddAssign" | "Constructor" | "Div" | "DivAssign" | "From" | "FromStr" | "Mul" | "MulAssign" | "Neg" | "Rem" | "RemAssign" | "Shl" | "ShlAssign" | "Shr" | "ShrAssign" | "Sub" | "SubAssign" | "Sum"
-            ) => Err(syn::Error::new_spanned(
+            derive_more @ ("Add" | "AddAssign" | "Constructor" | "Div"
+            | "DivAssign" | "From" | "FromStr" | "Mul"
+            | "MulAssign" | "Neg" | "Rem" | "RemAssign"
+            | "Shl" | "ShlAssign" | "Shr" | "ShrAssign"
+            | "Sub" | "SubAssign" | "Sum") => Err(syn::Error::new_spanned(
                 trait_path,
-                format!("Deriving `{derive_more}` results in a possible bypass of the validators and sanitizers and is therefore forbidden.")
+                format!(
+                    "Deriving `{derive_more}` results in a possible bypass of the validators and sanitizers and is therefore forbidden."
+                ),
             )),
             "Default" => Err(syn::Error::new_spanned(
                 trait_path,
-                "To derive the `Default` trait, use the `default` or `default = ..` argument."
+                "To derive the `Default` trait, use the `default` or `default = ..` argument.",
             )),
             _ => Ok(Self::Transparent(trait_path)),
         }
@@ -75,7 +78,9 @@ impl codegen::Gen for Derive {
                     let type_name = ctx.type_name();
                     let (impl_generics, ty_generics, where_clause) =
                         ctx.generics().split_for_impl();
-                    let panic_msg = format!("{type_name}::cmp() panicked, because partial_cmp() returned None. Could it be that you're using unsafe {type_name}::new_unchecked() ?");
+                    let panic_msg = format!(
+                        "{type_name}::cmp() panicked, because partial_cmp() returned None. Could it be that you're using unsafe {type_name}::new_unchecked() ?"
+                    );
                     codegen::Implementation::ItemImpl(parse_quote! {
                         #[expect(clippy::derive_ord_xor_partial_ord, reason = "Manual impl when involving floats.")]
                         impl #impl_generics #path for #type_name #ty_generics #where_clause {

@@ -9,10 +9,10 @@ use crate::utils;
 /* Dependencies */
 use quote::ToTokens as _;
 use syn::{
+    PathSegment,
     parse::{Parse, ParseBuffer},
     punctuated::Punctuated,
     token::Comma,
-    PathSegment,
 };
 
 pub(crate) trait SynDataExt {
