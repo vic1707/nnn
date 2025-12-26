@@ -54,6 +54,7 @@ fn expand(
         err_display_arm,
         sanitization_steps,
         new_enums,
+        custom_test_harness,
     ) = codegen::Implementation::separate_variants(&impls);
 
     let dedup_err_variants = err_variants
@@ -119,6 +120,7 @@ fn expand(
             #(#new_enums)*
 
             #[cfg(test)]
+            #custom_test_harness
             mod tests {
                 use super::*;
 

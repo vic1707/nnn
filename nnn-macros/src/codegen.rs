@@ -36,6 +36,8 @@ pub(crate) enum Implementation {
     SanitizationStep(syn::Block),
 
     Enum(syn::ItemEnum),
+
+    CustomTestHarness(syn::Attribute),
 }
 
 impl Implementation {
@@ -70,6 +72,7 @@ impl Implementation {
                     .for_each(|arm| arm.attrs.push(cfg_attr.clone()));
             },
             Self::Enum(ref mut item) => item.attrs.push(cfg_attr),
+            Self::CustomTestHarness(_) => panic!("`custom_test_harness` not supported in `cfg`."),
         }
     }
 
@@ -85,6 +88,7 @@ impl Implementation {
         impl Iterator<Item = &syn::Arm>,
         impl Iterator<Item = &syn::Block>,
         impl Iterator<Item = &syn::ItemEnum>,
+        Option<&syn::Attribute>,
     ) {
         let impl_blocks = impls.iter().filter_map(|item| match *item {
             Self::ItemImpl(ref el) => Some(el),
@@ -131,6 +135,11 @@ impl Implementation {
             _ => None,
         });
 
+        let custom_test_harness = impls.iter().find_map(|item| match *item {
+            Self::CustomTestHarness(ref custom) => Some(custom),
+            _ => None,
+        });
+
         (
             impl_blocks,
             impl_items,
@@ -140,6 +149,7 @@ impl Implementation {
             err_display_arm,
             sanitization_steps,
             enums,
+            custom_test_harness,
         )
     }
 }

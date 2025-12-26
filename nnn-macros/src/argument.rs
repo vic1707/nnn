@@ -39,6 +39,7 @@ pub(crate) struct Arguments {
     validators: Vec<Validator>,
     cfgs: Vec<Cfg>,
     transparents: Vec<syn::Meta>,
+    custom_test_harness: Option<syn::Meta>,
 }
 
 impl Arguments {
@@ -59,6 +60,14 @@ impl Arguments {
                     .iter()
                     .map(|meta| parse_quote! { #[#meta] })
                     .map(|attr| codegen::Implementation::Attribute(vec![attr])),
+            )
+            .chain(
+                self.custom_test_harness
+                    .iter()
+                    .map(|meta| parse_quote! { #[#meta] })
+                    .map(|attr| {
+                        codegen::Implementation::CustomTestHarness(attr)
+                    }),
             )
             .collect()
     }
@@ -101,6 +110,9 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
                 Argument::Transparent(metas) => {
                     args.transparents.extend(metas);
                 },
+                Argument::CustomTestHarness(custom) => {
+                    args.custom_test_harness = Some(custom);
+                },
             }
         }
         args
@@ -118,6 +130,7 @@ pub(crate) enum Argument {
     Sanitizers(Punctuated<Sanitizer, Comma>),
     Validators(Punctuated<Validator, Comma>),
     Transparent(Punctuated<syn::Meta, Comma>),
+    CustomTestHarness(syn::Meta),
 }
 
 impl Parse for Argument {
@@ -147,6 +160,9 @@ impl Parse for Argument {
             },
             "attrs" => {
                 Self::Transparent(input.parse_parenthesized::<syn::Meta>()?)
+            },
+            "custom_test_harness" => {
+                Self::CustomTestHarness(input.parse_equal()?)
             },
             _ => {
                 return Err(syn::Error::new_spanned(ident, "Unknown argument."))
