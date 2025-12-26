@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 #![no_std]
 
+#[cfg(feature = "macros")]
 pub use nnn_macros::nnn;
 
 pub trait NNNewType: Sized {

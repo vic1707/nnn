@@ -1,3 +1,4 @@
+#![cfg(feature = "macros")]
 #![allow(dead_code, unused_imports, reason = "Tests, dead_code is expected.")]
 /* Modules */
 #[rustfmt::skip] // wants to reorder modules
