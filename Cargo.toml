@@ -30,5 +30,5 @@ paste = "1.0.15"
 regex = "1.12.2"
 rstest = "0.26.1"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.147"
+serde_json = "1.0.148"
 trybuild = "1.0.114"
