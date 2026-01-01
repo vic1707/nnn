@@ -21,7 +21,7 @@ default = []
 regex_validation = ["dep:regex"]
 
 [dependencies]
-proc-macro2 = "1.0.103"
+proc-macro2 = "1.0.104"
 quote = "1.0.42"
 regex = { version = "1.12.2", optional = true }
-syn = { version = "2.0.111", features = ["full"] }
+syn = { version = "2.0.112", features = ["full"] }
