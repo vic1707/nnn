@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.2.3] - 2026-06-18
+
+- **Chores:** Update deps
+- **Fix:** Use qualified `Into` call so compiler doesn't have to guess ([b39585ae](https://github.com/vic1707/nnn/commit/b39585ae))
+
 ## [v1.2.2] - 2025-12-26
 
 - **Feat:** Support for custom test-harness ([7439a6a0](https://github.com/vic1707/nnn/commit/7439a6a0))
