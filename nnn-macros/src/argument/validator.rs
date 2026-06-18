@@ -204,13 +204,13 @@ impl Validator {
             Self::Positive => {
                 parse_quote! {{
                     // Terrible hack since 0.into() doesn't work for floats
-                    if !(value > false.into()) { return Err(<Self as nnn::NNNewType>::Error::Positive) }
+                    if !(value > ::core::convert::Into::<Self::Inner>::into(false)) { return Err(<Self as nnn::NNNewType>::Error::Positive) }
                 }}
             },
             Self::Negative => {
                 parse_quote! {{
                     // Terrible hack since 0.into() doesn't work for floats
-                    if ! (value < false.into()) { return Err(<Self as nnn::NNNewType>::Error::Negative) }
+                    if ! (value < ::core::convert::Into::<Self::Inner>::into(false)) { return Err(<Self as nnn::NNNewType>::Error::Negative) }
                 }}
             },
             // Float specifics
