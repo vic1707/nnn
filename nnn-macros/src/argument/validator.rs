@@ -5,9 +5,8 @@ use alloc::{format, string::ToString as _, vec, vec::Vec};
 use crate::{
     codegen,
     utils::{
-        closure::CustomFunction,
-        regex_input::RegexInput,
-        syn_ext::{SynParseBufferExt as _, SynPathExt as _},
+        closure::CustomFunction, regex_input::RegexInput,
+        syn_ext::SynParseBufferExt as _,
     },
 };
 /* Dependencies */
@@ -19,6 +18,7 @@ use syn::{
     token::Comma,
 };
 
+#[allow(clippy::large_enum_variant)]
 pub(crate) enum Validator {
     // Containers
     NotEmpty,
@@ -45,9 +45,7 @@ pub(crate) enum Validator {
     Exactly(syn::Expr),
     Custom {
         check: CustomFunction,
-        error: syn::Path,
-        /// derived from error path
-        error_name: syn::Ident,
+        error: syn::Variant,
     },
     Predicate {
         check: CustomFunction,
@@ -138,12 +136,8 @@ impl Validator {
             Self::Regex(_) => parse_quote! { Regex },
             // Commons
             Self::Exactly(_) => parse_quote! { Exactly },
-            Self::Custom {
-                ref error,
-                ref error_name,
-                ..
-            } => {
-                parse_quote! { #error_name(#error) }
+            Self::Custom { ref error, .. } => {
+                parse_quote! { #error }
             },
             Self::Predicate { ref variant, .. } => {
                 parse_quote! { #variant }
@@ -250,18 +244,22 @@ impl Validator {
             },
             Self::Custom {
                 ref check,
-                ref error_name,
-                ..
-            } => match *check {
-                CustomFunction::Block(ref block) => parse_quote! {{
-                    if let Err(err) = #block { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
-                }},
-                CustomFunction::Path(ref func) => parse_quote! {{
-                    if let Err(err) = #func(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
-                }},
-                CustomFunction::Closure(ref expr_closure) => parse_quote! {{
-                    if let Err(err) = (#expr_closure)(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
-                }},
+                ref error,
+            } => {
+                let error_name = &error.ident;
+                match *check {
+                    CustomFunction::Block(ref block) => parse_quote! {{
+                        if let Err(err) = #block { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
+                    }},
+                    CustomFunction::Path(ref func) => parse_quote! {{
+                        if let Err(err) = #func(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
+                    }},
+                    CustomFunction::Closure(ref expr_closure) => {
+                        parse_quote! {{
+                            if let Err(err) = (#expr_closure)(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
+                        }}
+                    },
+                }
             },
             Self::Predicate {
                 ref check,
@@ -409,7 +407,8 @@ impl Validator {
                 );
                 parse_quote! { Self::Exactly => write!(fmt, #msg), }
             },
-            Self::Custom { ref error_name, .. } => {
+            Self::Custom { ref error, .. } => {
+                let error_name = &error.ident;
                 let msg =
                     format!("[{type_name}] Value should be exactly {{}}.");
                 parse_quote! { Self::#error_name(ref inner_err) => write!(fmt, #msg, inner_err), }
@@ -458,14 +457,9 @@ impl Parse for Validator {
                 content.parse::<syn::Token![,]>()?;
 
                 content.require_ident("error")?;
-                let error = content.parse_equal::<syn::Path>()?;
-                let error_name = error.as_ident();
+                let error = content.parse_equal::<syn::Variant>()?;
 
-                Self::Custom {
-                    check,
-                    error,
-                    error_name,
-                }
+                Self::Custom { check, error }
             },
             "predicate" => {
                 let content;

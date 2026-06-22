@@ -1,3 +1,4 @@
+#![allow(clippy::infallible_try_from)]
 /* Crate imports */
 use nnn::nnn;
 

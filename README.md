@@ -236,7 +236,7 @@ The `validators` argument accepts the following options:
 - **Common**:
 
   - `exactly = ...`: Ensures the value is equal to the specified value.
-  - `custom(with = ..., error = ...)`: Validates using a custom function, specifying an error path.
+  - `custom(with = ..., error = ...)`: Validates using a custom function, specifying an error variant.
   - `predicate(with = ..., error_name = ...)`: Uses a predicate function with an optional custom error variant name (defaults to `Predicate`).
 
 ##### _Note:_ The `with =` argument to the `custom` and `predicate` validator/sanitizer can be of 3 forms:

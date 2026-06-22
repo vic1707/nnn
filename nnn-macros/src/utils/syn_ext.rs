@@ -4,10 +4,7 @@ use alloc::{
     format,
     string::{String, ToString},
 };
-/* Crate imports */
-use crate::utils;
 /* Dependencies */
-use quote::ToTokens as _;
 use syn::{
     PathSegment,
     parse::{Parse, ParseBuffer},
@@ -71,26 +68,11 @@ impl SynParseBufferExt for ParseBuffer<'_> {
 }
 
 pub(crate) trait SynPathExt {
-    fn as_ident(&self) -> syn::Ident;
     fn trait_segment(&self) -> syn::Result<&PathSegment>;
     fn item_name(&self) -> syn::Result<String>;
 }
 
 impl SynPathExt for syn::Path {
-    /// turns `std::io::Error` into `StdIoError`
-    fn as_ident(&self) -> syn::Ident {
-        quote::format_ident!(
-            "{}",
-            self.to_token_stream()
-                .to_string()
-                .to_ascii_lowercase()
-                .replace(':', "")
-                .split_ascii_whitespace()
-                .map(utils::capitalize)
-                .collect::<String>()
-        )
-    }
-
     fn trait_segment(&self) -> syn::Result<&PathSegment> {
         self.segments.last().ok_or_else(|| {
             syn::Error::new_spanned(self, "Trait doesn't have a name ??")

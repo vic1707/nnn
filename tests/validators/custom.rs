@@ -7,7 +7,7 @@ use rstest::rstest;
 
 #[nnn(
     validators(
-        custom(with = f64::from_str, error = num::ParseFloatError)
+        custom(with = f64::from_str, error = ParseFloat(num::ParseFloatError))
     )
 )]
 struct ValidatedFnPathFloatString(String);
@@ -23,13 +23,13 @@ fn validated_fn_path_float_string_valid(#[case] input: &str) {
 fn validated_fn_path_float_string_valid_invalid(#[case] input: &str) {
     assert!(matches!(
         ValidatedFnPathFloatString::try_new(input.to_owned()),
-        Err(ValidatedFnPathFloatStringError::NumParsefloaterror(_))
+        Err(ValidatedFnPathFloatStringError::ParseFloat(_))
     ));
 }
 
 #[nnn(
     validators(
-        custom(with = |str: &String| f64::from_str(str), error = num::ParseFloatError)
+        custom(with = |str: &String| f64::from_str(str), error = ParseFloat(num::ParseFloatError))
     )
 )]
 struct ValidatedClosureFloatString(String);
@@ -45,13 +45,13 @@ fn validated_closure_float_string_valid(#[case] input: &str) {
 fn validated_closure_float_string_invalid(#[case] input: &str) {
     assert!(matches!(
         ValidatedClosureFloatString::try_new(input.to_owned()),
-        Err(ValidatedClosureFloatStringError::NumParsefloaterror(_))
+        Err(ValidatedClosureFloatStringError::ParseFloat(_))
     ));
 }
 
 #[nnn(
     validators(
-        custom(with = { f64::from_str(&value) }, error = num::ParseFloatError)
+        custom(with = { f64::from_str(&value) }, error = ParseFloat(num::ParseFloatError))
     )
 )]
 struct ValidatedBlockFloatString(String);
@@ -67,6 +67,6 @@ fn validated_block_float_string_valid(#[case] input: &str) {
 fn validated_block_float_string_invalid(#[case] input: &str) {
     assert!(matches!(
         ValidatedBlockFloatString::try_new(input.to_owned()),
-        Err(ValidatedBlockFloatStringError::NumParsefloaterror(_))
+        Err(ValidatedBlockFloatStringError::ParseFloat(_))
     ));
 }
