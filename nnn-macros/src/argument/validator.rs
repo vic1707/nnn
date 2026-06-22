@@ -247,18 +247,34 @@ impl Validator {
                 ref error,
             } => {
                 let error_name = &error.ident;
-                match *check {
-                    CustomFunction::Block(ref block) => parse_quote! {{
-                        if let Err(err) = #block { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
-                    }},
-                    CustomFunction::Path(ref func) => parse_quote! {{
-                        if let Err(err) = #func(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
-                    }},
-                    CustomFunction::Closure(ref expr_closure) => {
-                        parse_quote! {{
-                            if let Err(err) = (#expr_closure)(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
-                        }}
-                    },
+                if matches!(error.fields, syn::Fields::Unit) {
+                    match *check {
+                        CustomFunction::Block(ref block) => parse_quote! {{
+                            if !#block { return Err(<Self as nnn::NNNewType>::Error::#error_name) }
+                        }},
+                        CustomFunction::Path(ref func) => parse_quote! {{
+                            if !#func(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name) }
+                        }},
+                        CustomFunction::Closure(ref expr_closure) => {
+                            parse_quote! {{
+                                if !(#expr_closure)(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name) }
+                            }}
+                        },
+                    }
+                } else {
+                    match *check {
+                        CustomFunction::Block(ref block) => parse_quote! {{
+                            if let Err(err) = #block { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
+                        }},
+                        CustomFunction::Path(ref func) => parse_quote! {{
+                            if let Err(err) = #func(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
+                        }},
+                        CustomFunction::Closure(ref expr_closure) => {
+                            parse_quote! {{
+                                if let Err(err) = (#expr_closure)(&value) { return Err(<Self as nnn::NNNewType>::Error::#error_name(err)) }
+                            }}
+                        },
+                    }
                 }
             },
             Self::Predicate {
@@ -409,9 +425,14 @@ impl Validator {
             },
             Self::Custom { ref error, .. } => {
                 let error_name = &error.ident;
-                let msg =
-                    format!("[{type_name}] Value should be exactly {{}}.");
-                parse_quote! { Self::#error_name(ref inner_err) => write!(fmt, #msg, inner_err), }
+                if matches!(error.fields, syn::Fields::Unit) {
+                    let msg = format!("[{type_name}] {error_name} violated.");
+                    parse_quote! { Self::#error_name => write!(fmt, #msg), }
+                } else {
+                    let msg =
+                        format!("[{type_name}] Value should be exactly {{}}.");
+                    parse_quote! { Self::#error_name(ref inner_err) => write!(fmt, #msg, inner_err), }
+                }
             },
             Self::Predicate { ref variant, .. } => {
                 let msg = format!("[{type_name}] {variant} violated.");

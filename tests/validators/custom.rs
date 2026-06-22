@@ -70,3 +70,82 @@ fn validated_block_float_string_invalid(#[case] input: &str) {
         Err(ValidatedBlockFloatStringError::ParseFloat(_))
     ));
 }
+
+#[nnn(
+    validators(
+        custom(
+            with = |bytes: &[u8]| matches!(bytes[0] & 0x0F, 0x02 | 0x06 | 0x0A | 0x0E),
+            error = NotLocallyAdministered
+        )
+    )
+)]
+struct MacAddressClosure([u8; 6]);
+
+#[rstest]
+#[case([0x02, 0x48, 0x65, 0x6E, 0x72, 0x69])]
+fn validated_boolean_custom_closure_valid(#[case] input: [u8; 6]) {
+    MacAddressClosure::try_new(input).unwrap();
+}
+
+#[rstest]
+#[case([0x01, 0x48, 0x65, 0x6E, 0x72, 0x69])]
+fn validated_boolean_custom_closure_invalid(#[case] input: [u8; 6]) {
+    assert!(matches!(
+        MacAddressClosure::try_new(input),
+        Err(MacAddressClosureError::NotLocallyAdministered)
+    ));
+}
+
+#[nnn(
+    validators(
+        custom(
+            with = { value[0] & 0x0F == 0x02 || value[0] & 0x0F == 0x06 || value[0] & 0x0F == 0x0A || value[0] & 0x0F == 0x0E },
+            error = NotLocallyAdministered
+        )
+    )
+)]
+struct MacAddressBlock([u8; 6]);
+
+#[rstest]
+#[case([0x02, 0x48, 0x65, 0x6E, 0x72, 0x69])]
+fn validated_boolean_custom_block_valid(#[case] input: [u8; 6]) {
+    MacAddressBlock::try_new(input).unwrap();
+}
+
+#[rstest]
+#[case([0x01, 0x48, 0x65, 0x6E, 0x72, 0x69])]
+fn validated_boolean_custom_block_invalid(#[case] input: [u8; 6]) {
+    assert!(matches!(
+        MacAddressBlock::try_new(input),
+        Err(MacAddressBlockError::NotLocallyAdministered)
+    ));
+}
+
+fn is_locally_administered(bytes: &[u8]) -> bool {
+    matches!(bytes[0] & 0x0F, 0x02 | 0x06 | 0x0A | 0x0E)
+}
+
+#[nnn(
+    validators(
+        custom(
+            with = is_locally_administered,
+            error = NotLocallyAdministered
+        )
+    )
+)]
+struct MacAddressFnPath([u8; 6]);
+
+#[rstest]
+#[case([0x02, 0x48, 0x65, 0x6E, 0x72, 0x69])]
+fn validated_boolean_custom_fn_path_valid(#[case] input: [u8; 6]) {
+    MacAddressFnPath::try_new(input).unwrap();
+}
+
+#[rstest]
+#[case([0x01, 0x48, 0x65, 0x6E, 0x72, 0x69])]
+fn validated_boolean_custom_fn_path_invalid(#[case] input: [u8; 6]) {
+    assert!(matches!(
+        MacAddressFnPath::try_new(input),
+        Err(MacAddressFnPathError::NotLocallyAdministered)
+    ));
+}
