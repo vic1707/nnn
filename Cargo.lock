@@ -101,7 +101,7 @@ checksum = "88904434abc2901f197fe8cc55f0445e7ded921dba5911dad2e2b39b48e663c4"
 
 [[package]]
 name = "nnn"
-version = "1.2.3"
+version = "1.2.4"
 dependencies = [
  "nnn-macros",
  "paste",
@@ -114,7 +114,7 @@ dependencies = [
 
 [[package]]
 name = "nnn-macros"
-version = "1.2.3"
+version = "1.2.4"
 dependencies = [
  "proc-macro2",
  "quote",

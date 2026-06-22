@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.2.4] - 2026-06-22
+
+- **Chores:** Update deps
+- **Feat:** Boolean validators ([307aa590](https://github.com/vic1707/nnn/commit/307aa590))
+- **Feat:** custom validator can choose variant name + more freedom ([ed05f582](https://github.com/vic1707/nnn/commit/ed05f582))
+
 ## [v1.2.3] - 2026-06-18
 
 - **Chores:** Update deps
