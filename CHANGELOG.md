@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.2.5] - 2026-06-25
+
+- **Feat:** custom attributes on Error ([feeaa7bf](https://github.com/vic1707/nnn/commit/feeaa7bf))
+
 ## [v1.2.4] - 2026-06-22
 
 - **Chores:** Update deps
