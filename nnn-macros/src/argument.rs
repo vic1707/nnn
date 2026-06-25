@@ -40,6 +40,7 @@ pub(crate) struct Arguments {
     cfgs: Vec<Cfg>,
     transparents: Vec<syn::Meta>,
     custom_test_harness: Option<syn::Meta>,
+    error_attrs: Vec<syn::Meta>,
 }
 
 impl Arguments {
@@ -88,6 +89,12 @@ impl Arguments {
     }
 }
 
+impl Arguments {
+    pub(crate) fn error_attrs(&self) -> &[syn::Meta] {
+        &self.error_attrs
+    }
+}
+
 impl From<Punctuated<Argument, Comma>> for Arguments {
     fn from(punctuated_args: Punctuated<Argument, Comma>) -> Self {
         let mut args = Self::default();
@@ -113,6 +120,9 @@ impl From<Punctuated<Argument, Comma>> for Arguments {
                 Argument::CustomTestHarness(custom) => {
                     args.custom_test_harness = Some(custom);
                 },
+                Argument::ErrorAttrs(metas) => {
+                    args.error_attrs.extend(metas);
+                },
             }
         }
         args
@@ -131,6 +141,7 @@ pub(crate) enum Argument {
     Validators(Punctuated<Validator, Comma>),
     Transparent(Punctuated<syn::Meta, Comma>),
     CustomTestHarness(syn::Meta),
+    ErrorAttrs(Punctuated<syn::Meta, Comma>),
 }
 
 impl Parse for Argument {
@@ -163,6 +174,9 @@ impl Parse for Argument {
             },
             "custom_test_harness" => {
                 Self::CustomTestHarness(input.parse_equal()?)
+            },
+            "error_attrs" => {
+                Self::ErrorAttrs(input.parse_parenthesized::<syn::Meta>()?)
             },
             _ => {
                 return Err(syn::Error::new_spanned(

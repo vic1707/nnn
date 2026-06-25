@@ -96,6 +96,16 @@ Below is a complete list of supported arguments for the `nnn` macro:
 
 - **`attrs(<attributes to pass down to the newtype>)`**: Specifies additional attributes for the newtype, such as `#[repr(C)]` or `#[non_exhaustive]`.
 
+- **`error_attrs(<attributes to pass down to the error type>)`**: Specifies additional attributes for the generated error type. Useful for adding derives conditionally, e.g. `error_attrs(cfg_attr(feature = "defmt", derive(defmt::Format)))`.
+
+  ```rs
+  #[nnn(error_attrs(cfg_attr(feature = "defmt", derive(defmt::Format))), validators(not_empty))]
+  struct MyName(String);
+  // Error enum gets: #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+  //                  #[derive(Debug, Clone, PartialEq, Eq)]
+  //                  pub enum MyNameError { NotEmpty }
+  ```
+
 ##### Derive Handling
 
 While most derives are passed through transparently, there are exceptions:

@@ -64,6 +64,7 @@ fn expand(
 
     let error_type = quote::format_ident!("{type_name}Error",);
     let mod_name = quote::format_ident!("__private_{type_name}",);
+    let error_attrs = ctx.args().error_attrs();
 
     Ok(quote! {
         #[doc(hidden)]
@@ -75,6 +76,7 @@ fn expand(
             #(#macro_attrs)*
             pub struct #type_name #generics (#inner_type) #where_clause;
 
+            #(#[#error_attrs])*
             #[derive(Debug, Clone, PartialEq, Eq)]
             #[non_exhaustive]
             pub enum #error_type {
