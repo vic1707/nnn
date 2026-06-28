@@ -127,12 +127,12 @@ Passed transparently, with `nnn` injecting `#[serde(try_from = "<inner>")]` to e
 1. **`Into`/`From`/`Borrow`/`AsRef`/`Deref`**
 
 These derives their respective traits to convert from a new-type to its inner type.
-These derives can take generic inputs as parameters, `#[nnn_derive(Into<i8, i16, 132>)]` will generate derives for `Into<i8>`/`Into<i16>`/`Into<i32>` for the new_type. `#[nnn_derive(Into)]` still defaults to deriving `Into<inner_type>`.
+These derives can take generic inputs as parameters, `#[nnn(nnn_derive(Into<i8, i16, i32>))]` will generate derives for `Into<i8>`/`Into<i16>`/`Into<i32>` for the new_type. `#[nnn(nnn_derive(Into))]` still defaults to deriving `Into<inner_type>`.
 
 _Note:_ `_`as a generic parameter will be translated to`<inner_type>`, e.g:
 
 ```rs
-#[nnn_derive(From<_>)]
+#[nnn(nnn_derive(From<_>))]
 struct A(i8);
 ```
 
@@ -141,12 +141,12 @@ will implement `From<i8>` for the new-type.
 2. **`TryFrom`**
 
 Implements `TryFrom` and calls the `try_new` methods.
-`TryFrom` can take generic parameters as parameters, `#[nnn_derive(TryFrom<i8, i16, 132>)]` will generate derives for `TryFrom<i8>`/`TryFrom<i16>`/`TryFrom<i32>`. `#[nnn_derive(TryFrom)]` still defaults to deriving `TryFrom<inner_type>`.
+`TryFrom` can take generic parameters as parameters, `#[nnn(nnn_derive(TryFrom<i8, i16, i32>))]` will generate derives for `TryFrom<i8>`/`TryFrom<i16>`/`TryFrom<i32>`. `#[nnn(nnn_derive(TryFrom))]` still defaults to deriving `TryFrom<inner_type>`.
 
 _Note:_ `_` as a generic parameter will be translated to `<inner_type>`, e.g:
 
 ```rs
-#[nnn_derive(TryFrom<_>)]
+#[nnn(nnn_derive(TryFrom<_>))]
 struct A(i8);
 ```
 
