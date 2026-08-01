@@ -24,4 +24,4 @@ regex_validation = ["dep:regex"]
 proc-macro2 = "1.0.106"
 quote = "1.0.46"
 regex = { version = "1.12.4", optional = true }
-syn = { version = "2.0.118", features = ["full"] }
+syn = { version = "3.0.3", features = ["full"] }
