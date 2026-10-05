@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.2.6] - 2026-09-05
+
+- **Fix:** validator expr could cause print error ([ec564dc6](https://github.com/vic1707/nnn/commit/ec564dc6))
+- **Fix:** better dedup and handling of conditional validators ([195d2b30](https://github.com/vic1707/nnn/commit/195d2b30))
+
 ## [v1.2.5] - 2026-06-25
 
 - **Feat:** custom attributes on Error ([feeaa7bf](https://github.com/vic1707/nnn/commit/feeaa7bf))

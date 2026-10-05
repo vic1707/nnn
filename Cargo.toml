@@ -1,6 +1,6 @@
 [package]
 name = "nnn"
-version = "1.2.5"
+version = "1.2.6"
 edition = "2024"
 authors = ["Victor LEFEBVRE <contact@vic1707.xyz>"]
 description = "Generate your newtypes from a single macro."
@@ -11,14 +11,14 @@ readme = "README.md"
 repository = "https://github.com/vic1707/nnn"
 categories = ["data-structures", "rust-patterns"]
 keywords = ["newtype", "validation", "sanitization", "derive", "invariant"]
-rust-version = "1.85.0"
+rust-version = "1.88.0"
 
 [workspace]
 resolver = "2"
 members = ["nnn-macros"]
 
 [dependencies]
-nnn-macros = { version = "1.2.5", path = "./nnn-macros", optional = true }
+nnn-macros = { version = "1.2.6", path = "./nnn-macros", optional = true }
 
 [features]
 default = ["macros"]
@@ -27,8 +27,8 @@ regex_validation = ["nnn-macros/regex_validation"]
 
 [dev-dependencies]
 paste = "1.0.15"
-regex = "1.12.4"
-rstest = "0.26.1"
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.150"
-trybuild = "1.0.117"
+regex = "1.13.1"
+rstest = "0.27.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+trybuild = "1.0.121"

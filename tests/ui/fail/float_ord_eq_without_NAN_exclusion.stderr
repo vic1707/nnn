@@ -22,7 +22,6 @@ error[E0277]: the trait bound `f64: Ord` is not satisfied
             u128
             u16
           and $N others
-  = note: this error originates in the derive macro `Ord` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the trait bound `f64: std::cmp::Eq` is not satisfied
  --> tests/ui/fail/float_ord_eq_without_NAN_exclusion.rs:6:14
@@ -47,7 +46,6 @@ note: required by a bound in `AssertParamIsEq`
   |
   | pub struct AssertParamIsEq<T: Eq + ?Sized> {
   |                               ^^ required by this bound in `AssertParamIsEq`
-  = note: this error originates in the derive macro `Eq` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the trait bound `f64: Ord` is not satisfied
   --> tests/ui/fail/float_ord_eq_without_NAN_exclusion.rs:13:20
@@ -67,7 +65,6 @@ error[E0277]: the trait bound `f64: Ord` is not satisfied
              u128
              u16
            and $N others
-   = note: this error originates in the derive macro `Ord` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the trait bound `f64: std::cmp::Eq` is not satisfied
   --> tests/ui/fail/float_ord_eq_without_NAN_exclusion.rs:13:20
@@ -92,7 +89,6 @@ note: required by a bound in `AssertParamIsEq`
    |
    | pub struct AssertParamIsEq<T: Eq + ?Sized> {
    |                               ^^ required by this bound in `AssertParamIsEq`
-   = note: this error originates in the derive macro `Eq` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the trait bound `f64: Ord` is not satisfied
   --> tests/ui/fail/float_ord_eq_without_NAN_exclusion.rs:27:21
@@ -112,7 +108,6 @@ error[E0277]: the trait bound `f64: Ord` is not satisfied
              u128
              u16
            and $N others
-   = note: this error originates in the derive macro `Ord` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the trait bound `f64: std::cmp::Eq` is not satisfied
   --> tests/ui/fail/float_ord_eq_without_NAN_exclusion.rs:27:21
@@ -137,4 +132,3 @@ note: required by a bound in `AssertParamIsEq`
    |
    | pub struct AssertParamIsEq<T: Eq + ?Sized> {
    |                               ^^ required by this bound in `AssertParamIsEq`
-   = note: this error originates in the derive macro `Eq` (in Nightly builds, run with -Z macro-backtrace for more info)
