@@ -57,10 +57,38 @@ fn expand(
         custom_test_harness,
     ) = codegen::Implementation::separate_variants(&impls);
 
-    let dedup_err_variants = err_variants
-        .map(|variant| (variant.ident.clone(), variant))
-        .collect::<BTreeMap<_, _>>()
-        .into_values();
+    let conditions = |variant: &syn::Variant| {
+        variant
+            .attrs
+            .iter()
+            .filter_map(|attr| {
+                if let syn::Meta::List(ref list) = attr.meta {
+                    attr.path().is_ident("cfg").then(|| list.tokens.clone())
+                } else {
+                    None
+                }
+            })
+            .collect::<alloc::vec::Vec<_>>()
+    };
+    let mut dedup_err_variants = BTreeMap::<syn::Ident, syn::Variant>::new();
+    for variant in err_variants {
+        let mut variant = variant.clone();
+        if let Some(previous) = dedup_err_variants.get(&variant.ident) {
+            let previous_conditions = conditions(previous);
+            let current_conditions = conditions(&variant);
+            variant.attrs.retain(|attr| !attr.path().is_ident("cfg"));
+            // A check's nested cfgs combine with AND; alternative checks with OR.
+            // Any unconditional check makes the shared error variant unconditional.
+            if !previous_conditions.is_empty() && !current_conditions.is_empty()
+            {
+                variant.attrs.push(syn::parse_quote! {
+                    #[cfg(any(all(#(#previous_conditions),*), all(#(#current_conditions),*)))]
+                });
+            }
+        }
+        dedup_err_variants.insert(variant.ident.clone(), variant);
+    }
+    let dedup_err_variants = dedup_err_variants.into_values();
 
     let error_type = quote::format_ident!("{type_name}Error",);
     let mod_name = quote::format_ident!("__private_{type_name}",);
