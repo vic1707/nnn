@@ -318,35 +318,35 @@ impl Validator {
                     "[{type_name}] Length should be greater than {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MinLength => write!(fmt, #msg), }
+                parse_quote! { Self::MinLength => fmt.write_str(#msg), }
             },
             Self::MinLengthOrEq(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be greater or equal to {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MinLengthOrEq => write!(fmt, #msg), }
+                parse_quote! { Self::MinLengthOrEq => fmt.write_str(#msg), }
             },
             Self::Length(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be exactly {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::Length => write!(fmt, #msg), }
+                parse_quote! { Self::Length => fmt.write_str(#msg), }
             },
             Self::MaxLength(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be lesser than {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MaxLength => write!(fmt, #msg), }
+                parse_quote! { Self::MaxLength => fmt.write_str(#msg), }
             },
             Self::MaxLengthOrEq(ref val) => {
                 let msg = format!(
                     "[{type_name}] Length should be lesser or equal to {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MaxLengthOrEq => write!(fmt, #msg), }
+                parse_quote! { Self::MaxLengthOrEq => fmt.write_str(#msg), }
             },
             // Numerics
             Self::Min(ref val) => {
@@ -354,28 +354,28 @@ impl Validator {
                     "[{type_name}] Value should be greater than {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::Min => write!(fmt, #msg), }
+                parse_quote! { Self::Min => fmt.write_str(#msg), }
             },
             Self::MinOrEq(ref val) => {
                 let msg = format!(
                     "[{type_name}] Value should be greater or equal to {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MinOrEq => write!(fmt, #msg), }
+                parse_quote! { Self::MinOrEq => fmt.write_str(#msg), }
             },
             Self::Max(ref val) => {
                 let msg = format!(
                     "[{type_name}] Value should be lesser than {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::Max => write!(fmt, #msg), }
+                parse_quote! { Self::Max => fmt.write_str(#msg), }
             },
             Self::MaxOrEq(ref val) => {
                 let msg = format!(
                     "[{type_name}] Value should be lesser or equal to {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::MaxOrEq => write!(fmt, #msg), }
+                parse_quote! { Self::MaxOrEq => fmt.write_str(#msg), }
             },
             Self::Positive => {
                 let msg = format!("[{type_name}] Value should be positive.");
@@ -421,7 +421,7 @@ impl Validator {
                     "[{type_name}] Value should be exactly {}.",
                     val.to_token_stream()
                 );
-                parse_quote! { Self::Exactly => write!(fmt, #msg), }
+                parse_quote! { Self::Exactly => fmt.write_str(#msg), }
             },
             Self::Custom { ref error, .. } => {
                 let error_name = &error.ident;
