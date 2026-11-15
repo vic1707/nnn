@@ -1,6 +1,6 @@
 [package]
 name = "nnn"
-version = "1.2.6"
+version = "1.2.7"
 edition = "2024"
 authors = ["Victor LEFEBVRE <contact@vic1707.xyz>"]
 description = "Generate your newtypes from a single macro."
@@ -18,7 +18,7 @@ resolver = "2"
 members = ["nnn-macros"]
 
 [dependencies]
-nnn-macros = { version = "1.2.6", path = "./nnn-macros", optional = true }
+nnn-macros = { version = "=1.2.7", path = "./nnn-macros", optional = true }
 
 [features]
 default = ["macros"]
@@ -26,9 +26,9 @@ macros = ["dep:nnn-macros"]
 regex_validation = ["nnn-macros/regex_validation"]
 
 [dev-dependencies]
-paste = "1.0.15"
-regex = "1.13.1"
-rstest = "0.27.0"
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
-trybuild = "1.0.121"
+paste = "=1.0.15"
+regex = "=1.13.1"
+rstest = "=0.28.0"
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.154"
+trybuild = "=1.0.123"

@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.2.7] - 2026-11-15
+
+- **Fix:** `default` test compile error on non-Copy values ([4d71cb64](https://github.com/vic1707/nnn/commit/4d71cb64))
+
 ## [v1.2.6] - 2026-09-05
 
 - **Fix:** validator expr could cause print error ([ec564dc6](https://github.com/vic1707/nnn/commit/ec564dc6))
