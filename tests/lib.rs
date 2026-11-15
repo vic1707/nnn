@@ -42,6 +42,8 @@ mod derives {
     mod try_from;
 }
 
+mod defaults;
+
 #[rustfmt::skip] // wants to reorder modules
 mod sanitizers {
     // Containers

@@ -54,7 +54,7 @@ impl codegen::Gen for Default {
                 let default_inner = <#type_name>::default().into_inner();
                 let rebuilt_default = <#type_name>::try_new(default_inner).expect(#err_msg);
                 assert_eq!(
-                    default_inner,
+                    <#type_name>::default().into_inner(), // reusing `default_inner` could require Clone
                     rebuilt_default.into_inner(),
                     "Default and rebuilt default are different, maybe you didn't sanitize your default?"
                 );
