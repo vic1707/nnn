@@ -155,7 +155,7 @@ will implement `TryFrom<i8>` for the new-type.
 3. **`FromStr`**
 
 Generates an implementation using the inner `FromStr` implementation and passing parsed value through sanitization and validation.
-It generates the following error enum implementing `Debug`, `Clone`, `PartialEq`, `Eq` and `Display`.
+It generates the following error enum implementing `Debug`, `Clone`, `PartialEq`, `Eq`, `Display` and `Error`.
 
 ```rs
 enum /* new_type's name */ParseError {

@@ -34,3 +34,9 @@ fn invalid_negative_float_parse_test(#[case] input: &str) {
         ))
     ));
 }
+
+#[test]
+fn parse_error_is_an_error() {
+    fn assert_error<E: core::error::Error>() {}
+    assert_error::<PositiveFloatParseError>();
+}

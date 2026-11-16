@@ -219,6 +219,9 @@ impl codegen::Gen for NNNDerive {
                         }
                     }),
                     codegen::Implementation::ItemImpl(parse_quote! {
+                        impl #impl_generics ::core::error::Error for #parse_err_name #ty_generics #where_clause {}
+                    }),
+                    codegen::Implementation::ItemImpl(parse_quote! {
                         impl #impl_generics ::core::str::FromStr for #type_name #ty_generics #where_clause {
                             type Err = #parse_err_name;
 
