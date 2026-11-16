@@ -88,7 +88,7 @@ checksum = "88904434abc2901f197fe8cc55f0445e7ded921dba5911dad2e2b39b48e663c4"
 
 [[package]]
 name = "nnn"
-version = "1.2.7"
+version = "1.2.8"
 dependencies = [
  "nnn-macros",
  "paste",
@@ -101,7 +101,7 @@ dependencies = [
 
 [[package]]
 name = "nnn-macros"
-version = "1.2.7"
+version = "1.2.8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -369,9 +369,9 @@ checksum = "756daf9b1013ebe47a8776667b466417e2d4c5679d441c26230efd9ef78692db"
 
 [[package]]
 name = "trybuild"
-version = "1.0.123"
+version = "1.0.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5dc7029163734745d9a24da4e1c74122e719d5045495c2d8d55c4cc2f6055fdf"
+checksum = "9838b494ee14d28f1eeea490e8f4f10248fa6dd371d4bc874b635de499408245"
 dependencies = [
  "glob",
  "serde",

@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [v1.2.8] - 2026-11-16
+
+- **Feat:** add `one_of` validator ([a3d508ea](https://github.com/vic1707/nnn/commit/a3d508ea))
+- **Feat:** add `::core::error::Error` to `from_str` error type ([4995216e](https://github.com/vic1707/nnn/commit/4995216e))
+
 ## [v1.2.7] - 2026-11-15
 
 - **Fix:** `default` test compile error on non-Copy values ([4d71cb64](https://github.com/vic1707/nnn/commit/4d71cb64))
