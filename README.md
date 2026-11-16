@@ -246,6 +246,7 @@ The `validators` argument accepts the following options:
 - **Common**:
 
   - `exactly = ...`: Ensures the value is equal to the specified value.
+  - `one_of = [...]`: Ensures the value is equal to one of the listed values. Accepts an array or anything with `.iter()`.
   - `custom(with = ..., error = ...)`: Validates using a custom function, specifying an error variant. The expected return type depends on the error variant: if it has fields, the expression must return `Result<_, E>`; if it is a unit variant, the expression must return `bool`.
   - `predicate(with = ..., error_name = ...)`: Uses a predicate function with an optional custom error variant name (defaults to `Predicate`).
 

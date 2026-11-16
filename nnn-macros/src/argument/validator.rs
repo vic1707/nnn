@@ -43,6 +43,7 @@ pub(crate) enum Validator {
     Regex(RegexInput),
     // Commons
     Exactly(syn::Expr),
+    OneOf(syn::Expr),
     Custom {
         check: CustomFunction,
         error: syn::Variant,
@@ -136,6 +137,7 @@ impl Validator {
             Self::Regex(_) => parse_quote! { Regex },
             // Commons
             Self::Exactly(_) => parse_quote! { Exactly },
+            Self::OneOf(_) => parse_quote! { OneOf },
             Self::Custom { ref error, .. } => {
                 parse_quote! { #error }
             },
@@ -240,6 +242,12 @@ impl Validator {
                 parse_quote! {{
                     #[allow(clippy::float_cmp, reason = "Allows transparency between signed numbers and floats.")]
                     if value != #val { return Err(<Self as nnn::NNNewType>::Error::Exactly) }
+                }}
+            },
+            Self::OneOf(ref candidates) => {
+                parse_quote! {{
+                    #[allow(clippy::float_cmp, reason = "Allows transparency between signed numbers and floats.")]
+                    if !(#candidates).iter().any(|candidate| value == *candidate) { return Err(<Self as nnn::NNNewType>::Error::OneOf) }
                 }}
             },
             Self::Custom {
@@ -423,6 +431,13 @@ impl Validator {
                 );
                 parse_quote! { Self::Exactly => fmt.write_str(#msg), }
             },
+            Self::OneOf(ref candidates) => {
+                let msg = format!(
+                    "[{type_name}] Value should be one of {}.",
+                    candidates.to_token_stream()
+                );
+                parse_quote! { Self::OneOf => fmt.write_str(#msg), }
+            },
             Self::Custom { ref error, .. } => {
                 let error_name = &error.ident;
                 if matches!(error.fields, syn::Fields::Unit) {
@@ -468,6 +483,8 @@ impl Parse for Validator {
             "not_nan" => Self::NotNAN,
             // String specifics
             "regex" => Self::Regex(input.parse_equal()?),
+            // Commons
+            "one_of" => Self::OneOf(input.parse_equal()?),
             "custom" => {
                 let content;
                 syn::parenthesized!(content in input);

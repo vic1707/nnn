@@ -26,6 +26,7 @@ mod validators {
     mod regex;
     // Common
     mod exactly;
+    mod one_of;
     mod custom;
     mod predicate;
 }
